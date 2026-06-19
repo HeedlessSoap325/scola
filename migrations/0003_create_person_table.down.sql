@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS person;
+
+DROP TYPE IF EXISTS person_role;
