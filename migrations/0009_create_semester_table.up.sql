@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS semester (
+	id UUID PRIMARY KEY NOT NULL,
+	name VARCHAR(100) NOT NULL,
+	start_date DATE NOT NULL,
+	end_date DATE NOT NULL
+);

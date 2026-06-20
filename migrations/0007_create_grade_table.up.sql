@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS grade (
+	id UUID PRIMARY KEY NOT NULL,
+	student_id UUID NOT NULL, FOREIGN KEY(student_id) REFERENCES student(id) ON DELETE CASCADE, 
+	value NUMERIC(5, 4) NOT NULL,
+	weight NUMERIC(5, 4) NOT NULL,
+	date DATE NOT NULL DEFAULT current_date
+);

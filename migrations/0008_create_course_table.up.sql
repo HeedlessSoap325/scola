@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS course (
+	id UUID PRIMARY KEY NOT NULL,
+	teacher_id UUID NOT NULL, FOREIGN KEY(teacher_id) REFERENCES teacher(id) ON DELETE CASCADE, 
+	name VARCHAR(100) NOT NULL,
+	abbreviation VARCHAR(100) NOT NULL,
+	description VARCHAR(100) NOT NULL
+);
