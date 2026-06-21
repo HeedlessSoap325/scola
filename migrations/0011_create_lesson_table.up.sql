@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS lesson (
 	room_id UUID NOT NULL, FOREIGN KEY(room_id) REFERENCES room(id) ON DELETE CASCADE, 
 	start_time TIMETZ NOT NULL,
 	end_time TIMETZ NOT NULL,
+	day_of_week SMALLINT NOT NULL, -- 0=Monday ... 4=Friday
 	title VARCHAR(100) NOT NULL
 );

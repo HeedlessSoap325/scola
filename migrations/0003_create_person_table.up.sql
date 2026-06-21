@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS person (
 	school_id UUID NOT NULL, FOREIGN KEY(school_id) REFERENCES school(id) ON DELETE CASCADE,
     email VARCHAR(320) NOT NULL,
     login_name VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(72) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     role person_role NOT NULL
 );
