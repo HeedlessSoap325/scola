@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS "lessonOverride" (
 	status lesson_status NOT NULL,
 	course_id UUID NOT NULL, FOREIGN KEY(course_id) REFERENCES course(id) ON DELETE CASCADE, 
 	room_id UUID NOT NULL, FOREIGN KEY(room_id) REFERENCES room(id) ON DELETE CASCADE, 
-	start_time TIMETZ NOT NULL,
-	end_time TIMETZ NOT NULL,
+	start_time TIME NOT NULL,
+	end_time TIME NOT NULL,
 	title VARCHAR(100) NOT NULL,
 	date DATE NOT NULL DEFAULT current_date
 );
