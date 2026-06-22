@@ -1,6 +1,7 @@
+use serde::Serialize;
 use sqlx::types::{BigDecimal, Uuid, chrono::{DateTime, NaiveDate, NaiveTime, Utc}};
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct School {
     pub id: Uuid,
     pub name: String,
@@ -8,7 +9,7 @@ pub struct School {
     pub address: String,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Room {
     pub id: Uuid,
     pub school_id: Uuid,
@@ -17,7 +18,7 @@ pub struct Room {
     pub building: String,
 }
 
-#[derive(Debug, Clone, Copy, sqlx::Type)]
+#[derive(Debug, Clone, Copy, sqlx::Type, Serialize)]
 #[sqlx(type_name = "person_role", rename_all = "snake_case")]
 pub enum PersonRole {
     Student,
@@ -37,7 +38,7 @@ pub struct Person {
     pub role: PersonRole,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Teacher {
     pub id: Uuid,
     pub address: String,
@@ -47,7 +48,7 @@ pub struct Teacher {
     pub phone: String,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Class {
     pub id: Uuid,
     pub school_id: Uuid,
@@ -57,7 +58,7 @@ pub struct Class {
     pub description: String,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Student {
     pub id: Uuid,
     pub class_id: Uuid,
@@ -66,7 +67,7 @@ pub struct Student {
     pub picture: String,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Grade {
     pub id: Uuid,
     pub student_id: Uuid,
@@ -75,7 +76,7 @@ pub struct Grade {
     pub date: NaiveTime,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Course {
     pub id: Uuid,
     pub teacher_id: Uuid,
@@ -84,7 +85,7 @@ pub struct Course {
     pub description: String,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Semester {
     pub id: Uuid,
     pub name: String,
@@ -92,14 +93,14 @@ pub struct Semester {
     pub end_date: NaiveDate,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct ClassToCourse {
     pub class_id: Uuid,
     pub course_id: Uuid,
     pub semester_id: Uuid,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Lesson {
     pub id: Uuid,
     pub course_id: Uuid,
@@ -110,7 +111,7 @@ pub struct Lesson {
     pub title: String,
 }
 
-#[derive(Debug, Clone, Copy, sqlx::Type)]
+#[derive(Debug, Clone, Copy, sqlx::Type, Serialize)]
 #[sqlx(type_name = "absence_status", rename_all = "snake_case")]
 pub enum AbsenceStatus {
     Pending,
@@ -118,7 +119,7 @@ pub enum AbsenceStatus {
     Approved,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Absence {
     pub id: Uuid,
     pub student_id: Uuid,
@@ -129,7 +130,7 @@ pub struct Absence {
     pub to_timestamp: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Copy, sqlx::Type)]
+#[derive(Debug, Clone, Copy, sqlx::Type, Serialize)]
 #[sqlx(type_name = "lesson_status", rename_all = "snake_case")]
 pub enum LessonStatus {
     Canceled,
@@ -139,7 +140,7 @@ pub enum LessonStatus {
     ModifiedByBlock,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct LessonOverride {
     pub id: Uuid,
     pub lesson_id: Uuid,
