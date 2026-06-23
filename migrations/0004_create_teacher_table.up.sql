@@ -1,8 +1,6 @@
 CREATE TABLE IF NOT EXISTS teacher (
     id UUID PRIMARY KEY REFERENCES person(id) ON DELETE CASCADE,
     address VARCHAR(100) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
     abbreviation VARCHAR(100) NOT NULL,
     phone VARCHAR(15) NOT NULL
 );

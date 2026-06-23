@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use crate::common::error::AppError;
 use crate::common::state::AppState;
-use crate::common::types::{Person, PersonRole, Student, Teacher};
+use crate::common::types::Person;
 use super::guards::{AuthUser, SESSION_COOKIE};
 use super::models::*;
 
@@ -79,39 +79,13 @@ pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser
     Json(AuthResponse { message: "Logged out".into() })
 }
 
-pub async fn me(State(state): State<AppState>, auth: AuthUser) -> Result<Json<MeResponse>, AppError> {
-    let (first_name, last_name, picture) = match auth.role {
-        PersonRole::Student => {
-            let s = sqlx::query_as::<_, Student>("SELECT * FROM student WHERE id = $1")
-                .bind(auth.id)
-                .fetch_one(&state.pool)
-                .await
-                .map_err(|_| AppError(
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "Person is a student, but student record wasn't found!",
-                ))?;
-            (Some(s.first_name), Some(s.last_name), Some(s.picture))
-        }
-        PersonRole::Teacher => {
-            let t = sqlx::query_as::<_, Teacher>("SELECT * FROM teacher WHERE id = $1")
-                .bind(auth.id)
-                .fetch_one(&state.pool)
-                .await
-                .map_err(|_| AppError(
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "Person is a teacher, but teacher record wasn't found!",
-                ))?;
-            (Some(t.first_name), Some(t.last_name), None)
-        }
-        _ => (None, None, None),
-    };
-
+pub async fn me(auth: AuthUser) -> Result<Json<MeResponse>, AppError> {
     Ok(Json(MeResponse {
         id: auth.id,
         email: auth.email,
         login_name: auth.login_name,
-        first_name,
-        last_name,
-        picture,
+        first_name: auth.first_name,
+        last_name: auth.last_name,
+        picture: auth.picture,
     }))
 }

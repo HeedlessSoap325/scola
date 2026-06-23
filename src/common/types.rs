@@ -33,6 +33,9 @@ pub struct Person {
     pub school_id: Uuid,
     pub email: String,
     pub login_name: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub picture: Option<String>,
     pub password: String,
     pub created_at: DateTime<Utc>,
     pub role: PersonRole,
@@ -42,8 +45,6 @@ pub struct Person {
 pub struct Teacher {
     pub id: Uuid,
     pub address: String,
-    pub first_name: String,
-    pub last_name: String,
     pub abbreviation: String,
     pub phone: String,
 }
@@ -62,9 +63,6 @@ pub struct Class {
 pub struct Student {
     pub id: Uuid,
     pub class_id: Uuid,
-    pub first_name: String,
-    pub last_name: String,
-    pub picture: String,
 }
 
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]

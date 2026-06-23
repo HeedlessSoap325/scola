@@ -18,7 +18,7 @@ pub struct MeResponse {
     pub id: Uuid,
     pub email: String,
     pub login_name: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
+    pub first_name: String,
+    pub last_name: String,
     pub picture: Option<String>,
 }

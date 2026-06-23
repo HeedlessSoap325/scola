@@ -11,10 +11,13 @@ use crate::common::{state::AppState, types::{Person, PersonRole}};
 pub const SESSION_COOKIE: &str = "session_id";
 
 pub struct AuthUser {
-	pub id: Uuid,
+    pub id: Uuid,
     pub school_id: Uuid,
     pub email: String,
     pub login_name: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub picture: Option<String>,
     pub created_at: DateTime<Utc>,
     pub role: PersonRole,
 }
@@ -55,12 +58,15 @@ impl FromRequestParts<AppState> for AuthUser {
 
         match person {
 			Ok(user) => Ok(AuthUser {
-				id: user.id,
-				login_name: user.login_name,
-				school_id: user.school_id,
-				email: user.email,
-				created_at: user.created_at,
-				role: user.role,
+                id: user.id,
+                school_id: user.school_id,
+                email: user.email,
+                login_name: user.login_name,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                picture: user.picture,
+                created_at: user.created_at,
+                role: user.role,
 			}),
 			Err(_) => Err(AuthError::InvalidSession),
 		}
