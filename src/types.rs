@@ -18,7 +18,7 @@ pub struct Room {
     pub building: String,
 }
 
-#[derive(Debug, Clone, Copy, sqlx::Type, Serialize)]
+#[derive(Debug, Clone, Copy, sqlx::Type, Serialize, PartialEq)]
 #[sqlx(type_name = "person_role", rename_all = "snake_case")]
 pub enum PersonRole {
     Student,
@@ -111,7 +111,7 @@ pub struct Lesson {
     pub title: String,
 }
 
-#[derive(Debug, Clone, Copy, sqlx::Type, Serialize)]
+#[derive(Debug, Clone, Copy, sqlx::Type, Serialize, PartialEq)]
 #[sqlx(type_name = "absence_status", rename_all = "snake_case")]
 pub enum AbsenceStatus {
     Pending,
@@ -130,7 +130,7 @@ pub struct Absence {
     pub to_timestamp: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Copy, sqlx::Type, Serialize)]
+#[derive(Debug, Clone, Copy, sqlx::Type, Serialize, PartialEq)]
 #[sqlx(type_name = "lesson_status", rename_all = "snake_case")]
 pub enum LessonStatus {
     Canceled,
