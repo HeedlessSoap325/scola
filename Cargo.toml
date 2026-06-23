@@ -5,11 +5,14 @@ edition = "2024"
 
 [dependencies]
 axum = "0.8.9"
+bcrypt = "0.19.2"
 bigdecimal = { version = "0.4.10", features = ["serde"] }
 chrono = { version = "0.4.45", features = ["serde"] }
+cookie = "0.18.1"
 dotenv = "0.15.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
 sqlx = { version = "0.9.0", features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "chrono", "uuid", "bigdecimal"] }
 tokio = { version = "1.52.3", features = ["full"] }
+tower-cookies = { version = "0.11.0", features = ["private", "signed"] }
 uuid = { version = "1.23.3", features = ["serde", "v4"] }
