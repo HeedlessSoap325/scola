@@ -1,0 +1,24 @@
+@PROTOCOL = http
+
+@HOST = localhost
+
+@PORT = 3000
+
+### LOGIN
+POST {{PROTOCOL}}://{{HOST}}:{{PORT}}/auth/login
+Content-Type: application/json
+
+{
+	"school": "2c64f5d3-4c82-4474-acf6-caa82be28f66",
+	"login_name": "patrick.lustenberger",
+	"password": "1234"
+}
+
+
+### ME
+GET {{PROTOCOL}}://{{HOST}}:{{PORT}}/auth/me
+Accept: application/json
+
+### LOGOUT
+POST {{PROTOCOL}}://{{HOST}}:{{PORT}}/auth/logout
+Accept: application/json
