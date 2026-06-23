@@ -6,7 +6,7 @@ use axum::{
 use chrono::{DateTime, Utc};
 use tower_cookies::Cookies;
 use uuid::Uuid;
-use crate::{state::AppState, types::{Person, PersonRole}};
+use crate::common::{state::AppState, types::{Person, PersonRole}};
 
 pub const SESSION_COOKIE: &str = "session_id";
 

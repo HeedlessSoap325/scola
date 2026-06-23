@@ -2,12 +2,10 @@ use axum::{Router, routing::{get, post}};
 use dotenv::dotenv;
 use tower_cookies::CookieManagerLayer;
 
-mod types;
-mod state;
+mod common;
 mod routes;
-mod error;
 
-use crate::{routes::auth::handlers::{login, logout, me}, state::AppState};
+use crate::{common::state::AppState, routes::auth::handlers::{login, logout, me}};
 
 #[tokio::main]
 async fn main() {

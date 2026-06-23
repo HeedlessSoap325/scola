@@ -2,16 +2,15 @@ use axum::{
     extract::State,
     http::StatusCode,
     Json,
-    response::IntoResponse,
 };
 use bcrypt::verify;
 use cookie::{time::Duration, Cookie, SameSite};
 use tower_cookies::Cookies;
 use uuid::Uuid;
 
-use crate::error::AppError;
-use crate::state::AppState;
-use crate::types::{Person, PersonRole, Student, Teacher};
+use crate::common::error::AppError;
+use crate::common::state::AppState;
+use crate::common::types::{Person, PersonRole, Student, Teacher};
 use super::guards::{AuthUser, SESSION_COOKIE};
 use super::models::*;
 
