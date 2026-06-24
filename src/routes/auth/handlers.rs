@@ -10,11 +10,11 @@ use uuid::Uuid;
 
 use crate::common::error::AppError;
 use crate::common::state::AppState;
-use crate::common::types::Person;
+use crate::common::types::{GenericResponse, Person};
 use super::guards::{AuthUser, SESSION_COOKIE};
 use super::models::*;
 
-pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): Json<LoginRequest>) -> Result<Json<AuthResponse>, AppError> {
+pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): Json<LoginRequest>) -> Result<Json<GenericResponse>, AppError> {
     let person = sqlx::query_as::<_, Person>(
 		r#"
 			SELECT * FROM person p  where p.login_name = $1 and p.school_id = $2
@@ -58,10 +58,10 @@ pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): 
 
     cookies.private(&state.cookie_key).add(cookie);
 
-    Ok(Json(AuthResponse { message: "Logged in".into() }))
+    Ok(Json(GenericResponse { message: "Logged in".into() }))
 }
 
-pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser) -> Json<AuthResponse> {
+pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser) -> Json<GenericResponse> {
     let private = cookies.private(&state.cookie_key);
 
     if let Some(session_cookie) = private.get(SESSION_COOKIE) {
@@ -76,7 +76,7 @@ pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser
         cookies.remove(removal);
     }
 
-    Json(AuthResponse { message: "Logged out".into() })
+    Json(GenericResponse { message: "Logged out".into() })
 }
 
 pub async fn me(auth: AuthUser) -> Result<Json<MeResponse>, AppError> {

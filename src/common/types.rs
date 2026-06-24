@@ -150,3 +150,8 @@ pub struct LessonOverride {
     pub title: String,
     pub date: NaiveDate,
 }
+
+#[derive(Serialize)]
+pub struct GenericResponse {
+    pub message: String,
+}
