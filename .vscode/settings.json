@@ -1,0 +1,8 @@
+{
+	"rest-client.rememberCookiesForSubsequentRequests": true,
+	"rest-client.environmentVariables": {
+		"$shared": {
+		  "BASE": "http://localhost:3000"
+		}
+	}
+}

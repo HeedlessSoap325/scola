@@ -1,11 +1,5 @@
-@PROTOCOL = http
-
-@HOST = localhost
-
-@PORT = 3000
-
 ### LOGIN
-POST {{PROTOCOL}}://{{HOST}}:{{PORT}}/auth/login
+POST {{BASE}}/auth/login
 Content-Type: application/json
 
 {
@@ -16,9 +10,9 @@ Content-Type: application/json
 
 
 ### ME
-GET {{PROTOCOL}}://{{HOST}}:{{PORT}}/auth/me
+GET {{BASE}}/auth/me
 Accept: application/json
 
 ### LOGOUT
-POST {{PROTOCOL}}://{{HOST}}:{{PORT}}/auth/logout
+POST {{BASE}}/auth/logout
 Accept: application/json
