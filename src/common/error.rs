@@ -11,3 +11,7 @@ impl IntoResponse for AppError {
         (self.0, body).into_response()
     }
 }
+
+pub fn db_error(_: sqlx::Error) -> AppError {
+    AppError(StatusCode::INTERNAL_SERVER_ERROR, "Database Query failed")
+}

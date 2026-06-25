@@ -2,11 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::{QueryBuilder};
 use uuid::Uuid;
 
-use crate::{common::{error::AppError, state::AppState, types::{Class, GenericResponse, PersonRole}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
-
-fn db_err(err: sqlx::Error) -> AppError {
-    AppError(StatusCode::INTERNAL_SERVER_ERROR, "Database Query failed")
-}
+use crate::{common::{error::{AppError, db_error}, state::AppState, types::{Class, GenericResponse, PersonRole}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
 
 pub async fn get_classes(
 	State(state): State<AppState>, 
@@ -58,7 +54,7 @@ pub async fn get_classes(
 		.build_query_as::<GetClassResponse>()
 		.fetch_all(&state.pool)
 		.await
-		.map_err(db_err)?;
+		.map_err(db_error)?;
 
 	Ok(Json(calsses))
 }
@@ -111,7 +107,7 @@ pub async fn add_class(
 	.bind(body.description)
 	.execute(&state.pool)
 	.await
-	.map_err(db_err)?;
+	.map_err(db_error)?;
 
 	Ok(Json( GenericResponse { 
 		message: "Class created".to_string()
@@ -134,7 +130,7 @@ pub async fn delete_class(
     .bind(class_id)
     .fetch_one(&state.pool)
     .await
-    .map_err(db_err)?;
+    .map_err(db_error)?;
 
 	if (user.role != PersonRole::LocalAdmin || class.school_id != user.school_id ) && user.role != PersonRole::Admin {
 		return Err( AppError(
@@ -152,7 +148,7 @@ pub async fn delete_class(
 	.bind(class_id).
 	execute(&state.pool)
 	.await
-	.map_err(db_err)?;
+	.map_err(db_error)?;
 
 	Ok(Json( GenericResponse {
 		message: "Class deleted".to_string(),
@@ -176,7 +172,7 @@ pub async fn edit_class(
     .bind(class_id)
     .fetch_one(&state.pool)
     .await
-    .map_err(db_err)?;
+    .map_err(db_error)?;
 
 	if (user.role != PersonRole::LocalAdmin || class.school_id != user.school_id ) && user.role != PersonRole::Admin {
 		return Err( AppError(
@@ -221,7 +217,7 @@ pub async fn edit_class(
 	.bind(new_class.id)
 	.execute(&state.pool)
 	.await
-	.map_err(db_err)?;
+	.map_err(db_error)?;
 
 	Ok(Json( GenericResponse { 
 		message: "Class updated".to_string()
