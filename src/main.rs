@@ -1,11 +1,11 @@
-use axum::{Router, routing::{get, post}};
+use axum::{Router, routing::{delete, get, patch, post}};
 use dotenv::dotenv;
 use tower_cookies::CookieManagerLayer;
 
 mod common;
 mod routes;
 
-use crate::{common::state::AppState, routes::auth::handlers::{login, logout, me}};
+use crate::{common::state::AppState, routes::{auth::handlers::{login, logout, me}, class::handlers::{add_class, delete_class, edit_class, get_classes}}};
 
 #[tokio::main]
 async fn main() {
@@ -19,6 +19,11 @@ async fn main() {
         .route("/auth/login", post(login))
         .route("/auth/logout", post(logout))
         .route("/auth/me", get(me))
+
+        .route("/class", get(get_classes))
+        .route("/class", post(add_class))
+        .route("/class/{class_id}", delete(delete_class))
+        .route("/class/{class_id}", patch(edit_class))
         .with_state(state)
         .layer(CookieManagerLayer::new());
 

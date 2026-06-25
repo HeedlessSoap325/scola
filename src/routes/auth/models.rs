@@ -9,11 +9,6 @@ pub struct LoginRequest {
 }
 
 #[derive(Serialize)]
-pub struct AuthResponse {
-    pub message: String,
-}
-
-#[derive(Serialize)]
 pub struct MeResponse {
     pub id: Uuid,
     pub email: String,
