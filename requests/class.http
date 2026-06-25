@@ -1,0 +1,29 @@
+### Get classes 
+## student -> class
+## teacher -> all teaching classes
+## local admin -> all classes in the school
+## admin -> all classes
+GET {{BASE}}/class
+Accept: application/json
+
+### Create a Class 
+POST {{BASE}}/class
+Content-Type: application/json
+
+{
+	"name": "26dW",
+	"abbreviation": "1dW",
+    "description": "Klasse dW im Schuljahr 2025",
+	"teacher": "bd102928-e213-4911-8c4d-bf2123addeb8"
+}
+
+### Edit a Class
+PATCH {{BASE}}/class/932f851b-a42f-4653-9c41-d6afd7f771a3
+Content-Type: application/json
+
+{
+	"description": "Klasse dW im Schuljahr 2026"
+}
+
+### Delete a class
+DELETE {{BASE}}/class/932f851b-a42f-4653-9c41-d6afd7f771a3
