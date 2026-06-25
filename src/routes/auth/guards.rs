@@ -40,11 +40,19 @@ impl FromRequestParts<AppState> for AuthUser {
         let session_id = session_cookie.value().to_string();
 
         // 3. Look up the session
-        let sessions = state.sessions.read().await;
-        let user_id = sessions
-            .get(&session_id)
-            .cloned()
-            .ok_or(AuthError::InvalidSession)?;
+        let session = {
+            let sessions = state.sessions.read().await;
+            sessions
+                .get(&session_id)
+                .cloned()
+                .ok_or(AuthError::InvalidSession)?
+            // read guard dropped here
+        };
+        
+        if !session.valid() {
+            state.sessions.write().await.remove(&session_id);
+            return Err(AuthError::InvalidSession);
+        }
 
         // 4. Look up the user
         let person = sqlx::query_as::<_, Person>(
@@ -52,7 +60,7 @@ impl FromRequestParts<AppState> for AuthUser {
 				SELECT * FROM person p where p.id = $1 
 			"#
 		)
-		.bind(user_id)
+		.bind(session.user_id)
 		.fetch_one(&state.pool)
 		.await;
 

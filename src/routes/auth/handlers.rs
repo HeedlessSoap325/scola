@@ -9,7 +9,7 @@ use tower_cookies::Cookies;
 use uuid::Uuid;
 
 use crate::common::error::AppError;
-use crate::common::state::AppState;
+use crate::common::state::{AppState, Session};
 use crate::common::types::{GenericResponse, Person};
 use super::guards::{AuthUser, SESSION_COOKIE};
 use super::models::*;
@@ -45,8 +45,9 @@ pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): 
 
     // Create session
     let session_id = Uuid::new_v4().to_string();
+    let session = Session::new(user_id.unwrap());
 
-    state.sessions.write().await.insert(session_id.clone(), user_id.unwrap());
+    state.sessions.write().await.insert(session_id.clone(), session);
 
     // Build private (encrypted + signed) cookie
     let mut cookie = Cookie::new(SESSION_COOKIE, session_id);
@@ -77,6 +78,25 @@ pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser
     }
 
     Json(GenericResponse { message: "Logged out".into() })
+}
+
+pub async fn logout_all(
+    State(state): State<AppState>,
+    cookies: Cookies,
+    user: AuthUser,
+) -> Result<Json<GenericResponse>, AppError>
+{
+    // Invalidate server-side sessions
+    state.sessions.write().await.retain(|_, session| session.user_id != user.id);
+      
+    // Remove the cookie from the client
+    let mut removal = Cookie::from(SESSION_COOKIE);
+    removal.set_path("/");
+    cookies.remove(removal);
+
+    Ok(Json(GenericResponse { 
+        message: "Logged out".into(),
+    }))
 }
 
 pub async fn me(auth: AuthUser) -> Result<Json<MeResponse>, AppError> {

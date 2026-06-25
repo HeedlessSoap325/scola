@@ -1,15 +1,32 @@
 use std::{collections::HashMap, sync::Arc};
 
+use chrono::{DateTime, Duration, Utc};
 use sqlx::{PgPool, postgres::PgPoolOptions};
 use tokio::sync::RwLock;
 use tower_cookies::Key;
 use uuid::Uuid;
 
 #[derive(Clone)]
+pub struct Session {
+	pub user_id: Uuid,
+	expiry: DateTime<Utc>,
+}
+
+impl Session {
+	pub fn new(user_id: Uuid) -> Self {
+		Self { user_id, expiry: Utc::now() + Duration::days(1) }
+	}
+
+	pub fn valid(&self) -> bool {
+		Utc::now() < self.expiry
+	}
+}
+
+#[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
     pub cookie_key: Arc<Key>,
-	pub sessions: Arc<RwLock<HashMap<String, Uuid>>>
+	pub sessions: Arc<RwLock<HashMap<String, Session>>>
 }
 
 impl AppState {
