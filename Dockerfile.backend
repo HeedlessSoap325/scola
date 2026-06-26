@@ -1,6 +1,6 @@
 # Make sure RUST_VERSION matches the Rust version
 ARG RUST_VERSION=1.95
-ARG APP_NAME=intranet_2_0
+ARG APP_NAME=scola
 ARG BACKEND_PORT=3000
 
 ################################################################################
