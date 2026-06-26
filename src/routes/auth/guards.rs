@@ -90,8 +90,8 @@ pub enum AuthError {
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
         let (status, message) = match self {
-            AuthError::MissingCookie => (StatusCode::UNAUTHORIZED, "Not logged in"),
-            AuthError::InvalidSession => (StatusCode::UNAUTHORIZED, "Session expired or invalid"),
+            AuthError::MissingCookie => (StatusCode::FORBIDDEN, "Not logged in"),
+            AuthError::InvalidSession => (StatusCode::FORBIDDEN, "Session expired or invalid"),
         };
         (status, message).into_response()
     }

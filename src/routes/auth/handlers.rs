@@ -37,7 +37,7 @@ pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): 
     if !password_valid || user_id.is_none() {
         return Err(
             AppError(
-                StatusCode::INTERNAL_SERVER_ERROR,
+                StatusCode::FORBIDDEN,
                 "Invalid credentials",
             )
         );

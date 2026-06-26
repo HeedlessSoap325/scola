@@ -1,22 +1,67 @@
 ### LOGIN
+## Authenticates a user for a specific school and returns a session cookie.
+##
+## Request Body:
+##   - school     (UUID, required): The UUID of the school the user belongs to
+##   - login_name (string, required): The user's login name (e.g. "firdtname.lastname")
+##   - password   (string, required): The user's password (plaintext)
+##
+## Responses:
+##   200 OK - Authentication successful; session cookie is set
+##   400 Bad Request - Missing or malformed request body fields
+##   403 Forbidden - Invalid credentials (wrong login_name or password), missing cookie or session expired
+##   500 Internal Server Error - Database Query failed
 POST {{BASE}}/auth/login
 Content-Type: application/json
 
 {
-	"school": "2c64f5d3-4c82-4474-acf6-caa82be28f66",
-	"login_name": "patrick.lustenberger",
-	"password": "1234"
+    "school": "2c64f5d3-4c82-4474-acf6-caa82be28f66",
+    "login_name": "patrick.lustenberger",
+    "password": "1234"
 }
 
 
 ### ME
+## Returns the profile of the currently authenticated user.
+## Requires an active session (cookie from login).
+##
+## Response Body (200 OK):
+##   - id         (UUID): Unique identifier of the user
+##   - email      (string): The user's email address
+##   - login_name (string): The user's login name
+##   - first_name (string): The user's first name
+##   - last_name  (string): The user's last name
+##   - picture    (string | null): URL to the user's profile picture, or null if not set
+##
+## Responses:
+##   200 OK - Returns MeResponse JSON object
+##   403 Forbidden - No active session / token missing or expired
+##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/auth/me
 Accept: application/json
 
+
 ### LOGOUT
+## Invalidates the current session of the authenticated user.
+## Only the session used for this request is terminated.
+## Requires an active session (cookie from login).
+##
+## Responses:
+##   200 OK - Session successfully invalidated
+##   403 Forbidden - No active session / token missing or expired
+##   500 Internal Server Error - Database Query failed
 POST {{BASE}}/auth/logout
 Accept: application/json
 
-### LOGOUT All
+
+### LOGOUT ALL
+## Invalidates ALL active sessions of the authenticated user across all devices.
+## Useful for "sign out everywhere" functionality.
+## Requires an active session (cookie from login).
+##
+## Responses:
+##   200 OK - All sessions successfully invalidated
+##   403 Forbidden - No active session / token missing or expired
+##   500 Internal Server Error - Database Query failed
 POST {{BASE}}/auth/logout_all
 Accept: application/json

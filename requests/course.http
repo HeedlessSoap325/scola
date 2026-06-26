@@ -1,37 +1,119 @@
-### Get courses
-## student -> students courses
-## teacher -> teachers courses
-## local admin -> all courses in the school
-## admin -> all courses
+### GET COURSES
+## Returns a list of courses filtered by semester. The result set is scoped
+## to the authenticated user's role:
+##   - Student -> only courses the student is enrolled in
+##   - Teacher -> only courses the teacher is assigned to
+##   - Local Admin -> all courses within the admin's school
+##   - Admin -> all courses across all schools
+##
+## Request Body:
+##   - semester_id (UUID, required): The UUID of the semester to filter courses by
+##
+## Response Body (200 OK) - Array of course objects, each containing:
+##   - course_id              (UUID) : Unique identifier of the course
+##   - course_name            (string): Full name of the course (e.g. "Wirtschaft und Recht")
+##   - course_abbreviation    (string): Short identifier (e.g. "WR")
+##   - course_description     (string): Description of the course
+##   - teacher_first_name     (string): First name of the assigned teacher
+##   - teacher_last_name      (string): Last name of the assigned teacher
+##   - teacher_email          (string): Email of the assigned teacher
+##   - teacher_phone          (string): Phone number of the assigned teacher
+##   - teacher_address        (string): Address of the assigned teacher
+##   - class_name             (string): Name of the class this course belongs to
+##
+## Responses:
+##   200 OK - Returns array of GetCourseResponse objects
+##   400 Bad Request -  Missing or invalid semester_id
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/course
 Content-Type: application/json
 Accept: application/json
 
 {
-	"semester_id": "a8a31a4d-abce-48d2-82f0-555f15e27694"
+    "semester_id": "a8a31a4d-abce-48d2-82f0-555f15e27694"
 }
 
-### Create a Course
+
+### CREATE A COURSE
+## Creates a new course and associates it with a teacher, class, and semester.
+## Restricted to Local Admin or Admin roles.
+##
+## Request Body:
+##   - name         (string, required): Full course name (e.g. "Wirtschaft und Recht")
+##   - abbreviation (string, required): Short course identifier (e.g. "WR")
+##   - description  (string, required): Human-readable description of the course
+##   - teacher      (UUID, required): UUID of the teacher assigned to this course
+##   - class        (UUID, required): UUID of the class this course is assigned to
+##   - semester     (UUID, required): UUID of the semester this course runs in
+##   - school_id    (UUID, optional): UUID of the school; only necessary if a admin creates a course
+##
+## Responses:
+##   200 OK - Course created successfully; returns the new course object or its ID
+##   400 Bad Request - Missing required fields or invalid UUID format
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - Teacher, class, semester, or school UUID does not exist
+##   500 Internal Server Error - Database Query failed
 POST {{BASE}}/course
 Content-Type: application/json
+Accept: application/json
+
 
 {
-	"name": "Wirtschaft und Recht",
+    "name": "Wirtschaft und Recht",
     "abbreviation": "WR",
     "description": "Wirtschaft und recht für die Klasse 3e",
-	"teacher": "df316fca-23d0-4f2f-9f16-545dd2372956",
-	"class": "00d92156-6f0f-491d-a224-15e2155627f1",
-	"semester": "a8a31a4d-abce-48d2-82f0-555f15e27694",
-	"school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
+    "teacher": "df316fca-23d0-4f2f-9f16-545dd2372956",
+    "class": "00d92156-6f0f-491d-a224-15e2155627f1",
+    "semester": "a8a31a4d-abce-48d2-82f0-555f15e27694",
+    "school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
 }
 
-### Edit a course
+
+### EDIT A COURSE
+## Partially updates an existing course identified by its UUID in the path.
+## Only the fields provided in the request body will be updated (PATCH semantics).
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {course_id} (UUID): The UUID of the course to update
+##
+## Request Body (all fields optional - only included fields are updated):
+##   - name         (string, optional): New full course name
+##   - abbreviation (string, optional): New short course identifier
+##   - description  (string, optional): New description text
+##   - teacher      (UUID, optional): UUID of the newly assigned teacher
+##   - class        (UUID, optional): UUID of the newly assigned class
+##
+## Responses:
+##   200 OK - Course updated successfully; returns updated course object
+##   400 Bad Request - Invalid UUID format or malformed body
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - Course, teacher, or class UUID does not exist
+##   500 Internal Server Error - Database Query failed
 PATCH {{BASE}}/course/8361cde2-1b8b-4fff-af42-d6ad27815e0d
 Content-Type: application/json
+Accept: application/json
 
 {
-	"description": "Wirtschaft und recht für die Klasse 4e"
+    "description": "Wirtschaft und recht für die Klasse 4e"
 }
 
-### Delete a course
+
+### DELETE A COURSE
+## Permanently deletes a course identified by its UUID in the path.
+## This action is irreversible. 
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {course_id} (UUID): The UUID of the course to delete
+##
+## Responses:
+##   200 OK - Course deleted successfully
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - Course UUID does not exist
 DELETE {{BASE}}/course/8361cde2-1b8b-4fff-af42-d6ad27815e0d
+Accept: application/json

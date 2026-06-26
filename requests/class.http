@@ -1,29 +1,99 @@
-### Get classes 
-## student -> class
-## teacher -> all teaching classes
-## local admin -> all classes in the school
-## admin -> all classes
+### GET CLASSES
+## Returns a list of classes. The result set is scoped to the authenticated user's role:
+##   - Student -> only the class the student belongs to
+##   - Teacher -> all classes the teacher is responsible for
+##   - Local Admin -> all classes within the admin's school
+##   - Admin -> all classes across all schools
+##
+## Response Body (200 OK) - Array of class objects, each containing:
+##   - class_name         (string): Full name of the class (e.g. "26dW")
+##   - class_abbreviation (string): Short identifier (e.g. "1dW")
+##   - teacher_first_name (string): First name of the responsible teacher
+##   - teacher_last_name  (string): Last name of the responsible teacher
+##   - teacher_email      (string): Email address of the responsible teacher
+##   - persons            (array): List of students in the class, each with:
+##       - first_name (string): Student's first name
+##       - last_name  (string): Student's last name
+##       - email      (string): Student's email address
+##
+## Responses:
+##   200 OK - Returns array of GetClassResponse objects
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/class
 Accept: application/json
 
-### Create a Class 
+
+### CREATE A CLASS
+## Creates a new class within the authenticated user's school.
+## Restricted to Local Admin or Admin roles.
+##
+## Request Body:
+##   - name         (string, required): Full class name (e.g. "26dW")
+##   - abbreviation (string, required): Short class identifier (e.g. "1dW")
+##   - description  (string, required): Human-readable description of the class
+##   - teacher      (UUID, required): UUID of the teacher responsible for this class
+##   - school_id    (UUID, optional): UUID of the school; only necessary if a admin creates a class
+##
+## Responses:
+##   200  OK - Class created successfully
+##   400 Bad Request - Missing required fields or invalid UUID format
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
 POST {{BASE}}/class
 Content-Type: application/json
+Accept: application/json
 
 {
-	"name": "26dW",
-	"abbreviation": "1dW",
+    "name": "26dW",
+    "abbreviation": "1dW",
     "description": "Klasse dW im Schuljahr 2025",
-	"teacher": "bd102928-e213-4911-8c4d-bf2123addeb8"
+    "teacher": "bd102928-e213-4911-8c4d-bf2123addeb8"
 }
 
-### Edit a Class
+
+### EDIT A CLASS
+## Partially updates an existing class identified by its UUID in the path.
+## Only the fields provided in the request body will be updated (PATCH semantics).
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {class_id} (UUID): The UUID of the class to update
+##
+## Request Body (all fields optional - only included fields are updated):
+##   - name         (string, optional): New full class name
+##   - abbreviation (string, optional): New short class identifier
+##   - description  (string, optional): New description text
+##   - teacher      (UUID, optional): UUID of the newly responsible teacher
+##
+## Responses:
+##   200 OK - Class updated successfully; returns updated class object
+##   400 Bad Request - Invalid UUID format or malformed body
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
 PATCH {{BASE}}/class/932f851b-a42f-4653-9c41-d6afd7f771a3
 Content-Type: application/json
+Accept: application/json
 
 {
-	"description": "Klasse dW im Schuljahr 2026"
+    "description": "Klasse dW im Schuljahr 2026"
 }
 
-### Delete a class
+
+### DELETE A CLASS
+## Permanently deletes a class identified by its UUID in the path.
+## This action is irreversible.
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {class_id} (UUID): The UUID of the class to delete
+##
+## Responses:
+##   200 OK - Class deleted successfully
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
 DELETE {{BASE}}/class/932f851b-a42f-4653-9c41-d6afd7f771a3
+Accept: application/json
