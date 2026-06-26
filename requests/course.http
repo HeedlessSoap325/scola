@@ -1,0 +1,37 @@
+### Get courses
+## student -> students courses
+## teacher -> teachers courses
+## local admin -> all courses in the school
+## admin -> all courses
+GET {{BASE}}/course
+Content-Type: application/json
+Accept: application/json
+
+{
+	"semester_id": "a8a31a4d-abce-48d2-82f0-555f15e27694"
+}
+
+### Create a Course
+POST {{BASE}}/course
+Content-Type: application/json
+
+{
+	"name": "Wirtschaft und Recht",
+    "abbreviation": "WR",
+    "description": "Wirtschaft und recht für die Klasse 3e",
+	"teacher": "df316fca-23d0-4f2f-9f16-545dd2372956",
+	"class": "00d92156-6f0f-491d-a224-15e2155627f1",
+	"semester": "a8a31a4d-abce-48d2-82f0-555f15e27694",
+	"school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
+}
+
+### Edit a course
+PATCH {{BASE}}/course/8361cde2-1b8b-4fff-af42-d6ad27815e0d
+Content-Type: application/json
+
+{
+	"description": "Wirtschaft und recht für die Klasse 4e"
+}
+
+### Delete a course
+DELETE {{BASE}}/course/8361cde2-1b8b-4fff-af42-d6ad27815e0d
