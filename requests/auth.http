@@ -16,3 +16,7 @@ Accept: application/json
 ### LOGOUT
 POST {{BASE}}/auth/logout
 Accept: application/json
+
+### LOGOUT All
+POST {{BASE}}/auth/logout_all
+Accept: application/json

@@ -5,7 +5,7 @@ use tower_cookies::CookieManagerLayer;
 mod common;
 mod routes;
 
-use crate::{common::state::AppState, routes::{auth::handlers::{login, logout, me}, class::handlers::{add_class, delete_class, edit_class, get_classes}, course::handlers::{add_course, delete_course, edit_course, get_courses}}};
+use crate::{common::state::AppState, routes::{auth::handlers::{login, logout, logout_all, me}, class::handlers::{add_class, delete_class, edit_class, get_classes}, course::handlers::{add_course, delete_course, edit_course, get_courses}}};
 
 #[tokio::main]
 async fn main() {
@@ -18,6 +18,7 @@ async fn main() {
     let app = Router::new()
         .route("/auth/login", post(login))
         .route("/auth/logout", post(logout))
+        .route("/auth/logout_all", post(logout_all))
         .route("/auth/me", get(me))
 
         .route("/class", get(get_classes))
