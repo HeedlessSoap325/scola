@@ -157,6 +157,6 @@ pub struct GenericResponse {
 }
 
 #[derive(Serialize)]
-pub struct RessourceResponse {
-    pub ressource_id: Uuid,
+pub struct ResourceResponse {
+    pub resource_id: Uuid,
 }

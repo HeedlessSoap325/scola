@@ -1,7 +1,7 @@
-use axum::{Json, extract::State, http::StatusCode};
+use axum::{Json, extract::{Path, State}, http::StatusCode};
 use uuid::Uuid;
 
-use crate::{common::{error::{AppError, db_error}, state::AppState, types::{PersonRole, RessourceResponse, School}}, routes::{auth::guards::AuthUser, school::models::{CreateSchoolRequest, GetSchoolResponse}}};
+use crate::{common::{error::{AppError, db_error}, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, class::models::PatchClassRequest, school::models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}};
 
 pub async fn get_schools(
 	State(state): State<AppState>,
@@ -23,7 +23,7 @@ pub async fn add_school(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Json(body): Json<CreateSchoolRequest>,
-) -> Result<Json<RessourceResponse>, AppError>
+) -> Result<Json<ResourceResponse>, AppError>
 {
 	if user.role != PersonRole::Admin {
 		return Err(AppError( StatusCode::UNAUTHORIZED, "Insufficient privileges" ));
@@ -46,7 +46,43 @@ pub async fn add_school(
 	.await
 	.map_err(db_error)?;
 
-	Ok(Json(RessourceResponse { 
-		ressource_id: school.id 
+	Ok(Json(ResourceResponse { 
+		resource_id: school.id 
+	}))
+}
+
+pub async fn edit_school(
+	State(state): State<AppState>,
+	user: AuthUser,
+	Path(school_id): Path<Uuid>,
+	Json(body): Json<PatchSchoolRequest>,
+) -> Result<Json<GenericResponse>, AppError>
+{
+	if user.role != PersonRole::Admin {
+		return Err(AppError( StatusCode::UNAUTHORIZED, "Insufficient privileges" ));
+	}
+	
+	sqlx::query(
+        r#"
+            UPDATE school
+            SET
+                name = COALESCE($1, name),
+                abbreviation = COALESCE($2, abbreviation),
+                address = COALESCE($3, address)
+            WHERE id = $4
+			RETURNING *
+        "#,
+    )
+    .bind(body.name)
+    .bind(body.abbreviation)
+	.bind(body.address)
+	.bind(school_id)
+    .fetch_optional(&state.pool)
+    .await
+    .map_err(db_error)?
+    .ok_or(AppError(StatusCode::NOT_FOUND, "School not found"))?;
+
+	Ok(Json(GenericResponse { 
+		message: "School updated".to_string(),
 	}))
 }

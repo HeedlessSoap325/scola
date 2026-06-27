@@ -9,7 +9,7 @@
 ##   - address       (string): Address of the school
 ##
 ## Responses:
-##   200 OK - Returns array of GetCourseResponse objects
+##   200 OK - Returns array of GetSchoolResponse objects
 ##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/school
 Accept: application/json
@@ -31,14 +31,43 @@ Accept: application/json
 ##   403 Forbidden - No active session
 ##   500 Internal Server Error - Database Query failed
 ##
-## @name ksh
+# @name ksh
 POST {{BASE}}/school
 Content-Type: application/json
 Accept: application/json
 
 
 {
-    "name": "Kantonsschule Hottingen",
+    "name": "Kantonsschule Hottingen Zürich",
     "abbreviation": "ksh",
     "address": "Minervastrasse 14, 8090 Zürich"
+}
+
+
+### EDIT A School
+## Partially updates an existing school identified by its UUID in the path.
+## Only the fields provided in the request body will be updated (PATCH semantics).
+## Restricted Admin role.
+##
+## Path Parameter:
+##   - {school_id} (UUID): The UUID of the school to update
+##
+## Request Body (all fields optional - only included fields are updated):
+##   - name         (string, optional): New full school name
+##   - abbreviation (string, optional): New short school identifier
+##   - address      (string, optional): New address of the school
+##
+## Responses:
+##   200 OK - school updated successfully
+##   400 Bad Request - Invalid UUID format or malformed body
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - School doesn't exist
+##   500 Internal Server Error - Database Query failed
+PATCH {{BASE}}/school/{{ksh.response.body.resource_id}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kantonsschule Hottingen"
 }
