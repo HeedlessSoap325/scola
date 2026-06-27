@@ -155,3 +155,8 @@ pub struct LessonOverride {
 pub struct GenericResponse {
     pub message: String,
 }
+
+#[derive(Serialize)]
+pub struct RessourceResponse {
+    pub ressource_id: Uuid,
+}

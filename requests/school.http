@@ -13,3 +13,32 @@
 ##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/school
 Accept: application/json
+
+
+### CREATE A SCHOOL
+## Creates a new school.
+## Restricted Admin role.
+##
+## Request Body:
+##   - name         (string, required): Full name of the school (e.g. "Kantonsschule Agisbühl Zürich")
+##   - abbreviation (string, required): Short school identifier (e.g. "kaz")
+##   - address      (string, required): Address of the school
+##
+## Responses:
+##   200 OK - School created successfully; returns the new school ID
+##   400 Bad Request - Missing required fields or invalid UUID format
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
+##
+## @name ksh
+POST {{BASE}}/school
+Content-Type: application/json
+Accept: application/json
+
+
+{
+    "name": "Kantonsschule Hottingen",
+    "abbreviation": "ksh",
+    "address": "Minervastrasse 14, 8090 Zürich"
+}
