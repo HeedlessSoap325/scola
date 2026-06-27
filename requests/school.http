@@ -1,0 +1,15 @@
+### GET SCHOOLS
+## Returns a list of schools. 
+## This is usefull to find the id of the school for login.
+##
+## Response Body (200 OK) - Array of school objects, each containing:
+##   - id            (UUID): Unique identifier of the school
+##   - name          (string): Full name of the school (e.g. "Kantonsschule Agisbühl Zürich")
+##   - abbreviation  (string): Short identifier (e.g. "kaz")
+##   - address       (string): Address of the school
+##
+## Responses:
+##   200 OK - Returns array of GetCourseResponse objects
+##   500 Internal Server Error - Database Query failed
+GET {{BASE}}/school
+Accept: application/json
