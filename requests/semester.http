@@ -1,0 +1,23 @@
+### GET SEMESTERS
+## Returns a list of semesters. The result set is scoped
+## to the authenticated user's role:
+##   - Student -> semesters in the school
+##   - Teacher -> semesters in the school
+##   - Local Admin -> semesters in the school
+##   - Admin -> all semesters across all schools
+##
+## Response Body (200 OK) - Array of semester objects, each containing:
+##   - id          (UUID): Unique identifier of the semester
+##   - school_id   (UUID): Unique identifier of the school
+##   - name        (string): Full name of the semester (e.g. "Herbstsemester 2025")
+##   - start_date  (NaiveDate): Beginning of the semester
+##   - end_date    (NaiveDate): End of the semester
+##
+## Responses:
+##   200 OK - Returns array of GetSemesterResponse objects
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
+GET {{BASE}}/semester
+Accept: application/json
+
+
