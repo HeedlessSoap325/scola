@@ -36,11 +36,13 @@ Accept: application/json
 ##   - school_id    (UUID, optional): UUID of the school; only necessary if a admin creates a class
 ##
 ## Responses:
-##   200  OK - Class created successfully
+##   200  OK - Class created successfully; returns the id of the created class
 ##   400 Bad Request - Missing required fields or invalid UUID format
 ##   401 Unauthorized - Insufficient permissions for this role
 ##   403 Forbidden - No active session
 ##   500 Internal Server Error - Database Query failed
+##
+# @name 1dw
 POST {{BASE}}/class
 Content-Type: application/json
 Accept: application/json
@@ -73,7 +75,7 @@ Accept: application/json
 ##   401 Unauthorized - Insufficient permissions for this role
 ##   403 Forbidden - No active session
 ##   500 Internal Server Error - Database Query failed
-PATCH {{BASE}}/class/932f851b-a42f-4653-9c41-d6afd7f771a3
+PATCH {{BASE}}/class/{{1dw.response.body.resource_id}}
 Content-Type: application/json
 Accept: application/json
 
@@ -95,5 +97,5 @@ Accept: application/json
 ##   401 Unauthorized - Insufficient permissions for this role
 ##   403 Forbidden - No active session
 ##   500 Internal Server Error - Database Query failed
-DELETE {{BASE}}/class/932f851b-a42f-4653-9c41-d6afd7f771a3
+DELETE {{BASE}}/class/{{1dw.response.body.resource_id}}
 Accept: application/json

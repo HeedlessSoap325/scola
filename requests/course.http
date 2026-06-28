@@ -55,6 +55,8 @@ Accept: application/json
 ##   403 Forbidden - No active session
 ##   404 Not Found - Teacher, class, semester, or school UUID does not exist
 ##   500 Internal Server Error - Database Query failed
+##
+# @name wr
 POST {{BASE}}/course
 Content-Type: application/json
 Accept: application/json
@@ -93,7 +95,7 @@ Accept: application/json
 ##   403 Forbidden - No active session
 ##   404 Not Found - Course, teacher, or class UUID does not exist
 ##   500 Internal Server Error - Database Query failed
-PATCH {{BASE}}/course/8361cde2-1b8b-4fff-af42-d6ad27815e0d
+PATCH {{BASE}}/course/{{wr.response.body.resource_id}}
 Content-Type: application/json
 Accept: application/json
 
@@ -115,5 +117,5 @@ Accept: application/json
 ##   401 Unauthorized - Insufficient permissions for this role
 ##   403 Forbidden - No active session
 ##   404 Not Found - Course UUID does not exist
-DELETE {{BASE}}/course/8361cde2-1b8b-4fff-af42-d6ad27815e0d
+DELETE {{BASE}}/course/{{wr.response.body.resource_id}}
 Accept: application/json
