@@ -1,7 +1,7 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
 use uuid::Uuid;
 
-use crate::{common::{error::{AppError, db_error}, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, class::models::PatchClassRequest, school::models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}};
+use crate::{common::{error::{AppError, db_error}, state::{self, AppState}, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, class::models::PatchClassRequest, school::{self, models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}}};
 
 pub async fn get_schools(
 	State(state): State<AppState>,
@@ -84,5 +84,33 @@ pub async fn edit_school(
 
 	Ok(Json(GenericResponse { 
 		message: "School updated".to_string(),
+	}))
+}
+
+pub async fn delete_school(
+	State(state): State<AppState>,
+	user: AuthUser,
+	Path(school_id): Path<Uuid>,
+) -> Result<Json<GenericResponse>, AppError>
+{
+	if user.role != PersonRole::Admin {
+		return Err(AppError( StatusCode::UNAUTHORIZED, "Insufficient privileges" ));
+	}
+
+	sqlx::query(
+		r#"
+			DELETE FROM school s
+			WHERE s.id = $1
+			RETURNING *
+		"#
+	)
+	.bind(school_id)
+	.fetch_optional(&state.pool)
+    .await
+    .map_err(db_error)?
+    .ok_or(AppError(StatusCode::NOT_FOUND, "School not found"))?;
+
+	Ok(Json(GenericResponse { 
+		message: "School deleted".to_string(),
 	}))
 }

@@ -71,3 +71,21 @@ Accept: application/json
 {
     "name": "Kantonsschule Hottingen"
 }
+
+
+### DELETE A SCHOOL
+## Permanently deletes a school identified by its UUID in the path.
+## This action is irreversible. 
+## Restricted Admin role.
+##
+## Path Parameter:
+##   - {school_id} (UUID): The UUID of the school to delete
+##
+## Responses:
+##   200 OK - School deleted successfully
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - SChool UUID does not exist
+##   500 Internal Server Error - Database Query failed
+DELETE {{BASE}}/school/{{ksh.response.body.resource_id}}
+Accept: application/json
