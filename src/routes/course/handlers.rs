@@ -133,6 +133,7 @@ pub async fn delete_course(
 		r#"
 			DELETE FROM course c
 			WHERE c.id = $1
+			RETURNING *
 		"#
 	)
 	.bind(course_id)
@@ -198,7 +199,7 @@ pub async fn edit_course(
         r#"
             UPDATE "classToCourse"
             SET
-                class_id = COALESCE($1, class_id),
+                class_id = COALESCE($1, class_id)
             WHERE course_id = $2
 			RETURNING *
         "#,
