@@ -80,3 +80,21 @@ Accept: application/json
 {
     "name": "Frühlingssemester 2026"
 }
+
+
+### DELETE A SEMESTER
+## Permanently deletes a semester identified by its UUID in the path.
+## This action is irreversible. 
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {semester_id} (UUID): The UUID of the semester to delete
+##
+## Responses:
+##   200 OK - Semester deleted successfully
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - Course UUID does not exist
+##   500 Internal Server Error - Database Query failed
+DELETE {{BASE}}/semester/{{fs.response.body.resource_id}}
+Accept: application/json
