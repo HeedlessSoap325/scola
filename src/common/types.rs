@@ -77,6 +77,7 @@ pub struct Grade {
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Course {
     pub id: Uuid,
+    pub school_id: Uuid,
     pub teacher_id: Uuid,
     pub name: String,
     pub abbreviation: String,
@@ -86,6 +87,7 @@ pub struct Course {
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Semester {
     pub id: Uuid,
+    pub school_id: Uuid,
     pub name: String,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
