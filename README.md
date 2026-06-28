@@ -83,6 +83,7 @@ docker compose up
 - A running PostgreSQL instance (local or remote)
 - [Cargo](https://doc.rust-lang.org/cargo/) (Rust's package manager and build tool)
 - *(Optional)* A database management tool such as [DBeaver](https://dbeaver.io/) or [pgAdmin](https://www.pgadmin.org/)
+- *(Optional)* The [rest-client VS Code Extension](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) is highly recommended to send requests from *.http* files, and the project is already set up for it.
 
 #### Steps
 
