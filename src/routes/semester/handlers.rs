@@ -1,4 +1,4 @@
-use axum::{Json, body, extract::{Path, State}, http::StatusCode};
+use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 

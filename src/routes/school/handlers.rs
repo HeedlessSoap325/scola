@@ -1,7 +1,7 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
 use uuid::Uuid;
 
-use crate::{common::{error::{AppError, db_error}, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, class::models::PatchClassRequest, school::{self, models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}}};
+use crate::{common::{error::{AppError, db_error}, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, school::models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}};
 
 pub async fn get_schools(
 	State(state): State<AppState>,
