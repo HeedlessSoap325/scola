@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{Class, Course, GenericResponse, PersonRole, Semester, Teacher}}, routes::{auth::guards::AuthUser, course::models::{CreateCourseRequest, GetCourseRequest, GetCourseResponse, PatchCourseRequest}}, verify_ownerships};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{Class, Course, GenericResponse, PersonRole, ResourceResponse, Semester, Teacher}}, routes::{auth::guards::AuthUser, course::models::{CreateCourseRequest, GetCourseRequest, GetCourseResponse, PatchCourseRequest}}, verify_ownerships};
 
 pub async fn get_courses(
 	State(state): State<AppState>,
@@ -65,7 +65,7 @@ pub async fn add_course(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Json(body): Json<CreateCourseRequest>,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<Json<ResourceResponse>, AppError>
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
@@ -78,22 +78,22 @@ pub async fn add_course(
 		);
 	}
 
-	let course_id = Uuid::new_v4();
-	sqlx::query(
+	let course: Course = sqlx::query_as::<_, Course>(
 		r#"
 			INSERT INTO course
 			(id, teacher_id, school_id, name, abbreviation, description)
 			VALUES
 			($1, $2, $3, $4, $5, $6)
+			RETURNING *
 		"#
 	)
-	.bind(course_id)
+	.bind(Uuid::new_v4())
 	.bind(body.teacher)
 	.bind(school_id)
 	.bind(body.name)
 	.bind(body.abbreviation)
 	.bind(body.description)
-	.execute(&state.pool)
+	.fetch_one(&state.pool)
 	.await
 	.map_err(db_error)?;
 
@@ -106,14 +106,14 @@ pub async fn add_course(
 		"#
 	)
 	.bind(body.class)
-	.bind(course_id)
+	.bind(course.id)
 	.bind(body.semester)
 	.execute(&state.pool)
 	.await
 	.map_err(db_error)?;
 
-	Ok(Json( GenericResponse { 
-		message: "Course created".to_string(),
+	Ok(Json(ResourceResponse { 
+		resource_id: course.id,
 	}))
 }
 

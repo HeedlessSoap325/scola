@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::{QueryBuilder};
 use uuid::Uuid;
 
-use crate::{common::{error::{AppError, db_error}, state::AppState, types::{Class, GenericResponse, PersonRole}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
+use crate::{common::{error::{AppError, db_error}, state::AppState, types::{Class, GenericResponse, PersonRole, ResourceResponse}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
 
 pub async fn get_classes(
 	State(state): State<AppState>, 
@@ -63,7 +63,7 @@ pub async fn add_class(
 	State(state): State<AppState>, 
 	user: AuthUser, 
 	Json(body): Json<CreateClassRequest>,
-) -> Result<Json<GenericResponse>, AppError> {
+) -> Result<Json<ResourceResponse>, AppError> {
 	if user.role != PersonRole::LocalAdmin && user.role != PersonRole::Admin {
 		return Err( AppError(
 			StatusCode::UNAUTHORIZED,
@@ -84,7 +84,7 @@ pub async fn add_class(
 		body.school_id.unwrap()
 	};
 
-	sqlx::query(
+	let class: Class = sqlx::query_as::<_, Class>(
 		r#"
 			INSERT INTO class 
 			(
@@ -97,6 +97,7 @@ pub async fn add_class(
 			) 
 			VALUES
 			($1, $2, $3, $4, $5, $6)
+			RETURNING *
 		"#
 	)
 	.bind(Uuid::new_v4())
@@ -105,12 +106,12 @@ pub async fn add_class(
 	.bind(body.name)
 	.bind(body.abbreviation)
 	.bind(body.description)
-	.execute(&state.pool)
+	.fetch_one(&state.pool)
 	.await
 	.map_err(db_error)?;
 
-	Ok(Json( GenericResponse { 
-		message: "Class created".to_string()
+	Ok(Json(ResourceResponse { 
+		resource_id: class.id,
 	}))
 }
 
