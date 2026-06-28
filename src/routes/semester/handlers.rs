@@ -1,8 +1,8 @@
-use axum::{Json, extract::State};
+use axum::{Json, body, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::resolve_school, error::{AppError, db_error}, state::AppState, types::{PersonRole, ResourceResponse, Semester}}, routes::{auth::guards::AuthUser, semester::models::{CreateSemesterRequest, GetSemesterResponse}}};
+use crate::{common::{admin_auth::resolve_school, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Semester}}, routes::{auth::guards::AuthUser, semester::models::{CreateSemesterRequest, GetSemesterResponse, PatchSemesterRequest}}};
 
 pub async fn get_semesters(
 	State(state): State<AppState>,
@@ -61,5 +61,43 @@ pub async fn add_semester(
 	
 	Ok(Json(ResourceResponse { 
 		resource_id: semester.id,
+	}))
+}
+
+pub async fn edit_semester(
+	State(state): State<AppState>,
+	user: AuthUser,
+	Path(semester_id): Path<Uuid>,
+	Json(body): Json<PatchSemesterRequest>,
+) -> Result<Json<GenericResponse>, AppError>
+{
+	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
+
+	if user.role == PersonRole::LocalAdmin {
+		verify_ownership::<Semester>(&state.pool, semester_id, school_id).await?;
+	}
+
+	sqlx::query(
+		r#"
+			UPDATE semester
+			SET
+				name = COALESCE($1, name),
+				start_date = COALESCE($2, start_date),
+				end_date = COALESCE($3, end_date)
+			WHERE id = $4
+			RETURNING *
+		"#
+	)
+	.bind(body.name)
+	.bind(body.start_date)
+	.bind(body.end_date)
+	.bind(semester_id)
+	.fetch_optional(&state.pool)
+	.await
+	.map_err(db_error)?
+	.ok_or(AppError(StatusCode::NOT_FOUND, "Semester not found"))?;
+
+	Ok(Json(GenericResponse { 
+		message: "Semester updated".to_string(),
 	}))
 }
