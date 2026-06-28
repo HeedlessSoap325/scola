@@ -21,3 +21,32 @@ GET {{BASE}}/semester
 Accept: application/json
 
 
+### CREATE A SEMESTER
+## Creates a new semester.
+## Restricted to Local Admin or Admin roles.
+##
+## Request Body:
+##   - name        (string, required): Full semester name (e.g. "Herbstsemester 2025")
+##   - start_date  (string, required): Start date
+##   - end_date    (string, required): End date
+##   - school_id   (UUID, optional): UUID of the school; only necessary if a admin creates a semester
+##
+## Responses:
+##   200 OK - Semester created successfully; returns the new semester object or its ID
+##   400 Bad Request - Missing required fields or invalid UUID format
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
+##
+# @name fs
+POST {{BASE}}/semester
+Content-Type: application/json
+Accept: application/json
+
+
+{
+    "name": "Frühlingssemester 2025",
+    "start_date": "2026-02-16",
+	"end_date": "2026-07-10",
+    "school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
+}
