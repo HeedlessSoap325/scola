@@ -19,3 +19,35 @@
 ##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/room
 Accept: application/json
+
+
+### CREATE A ROOM
+## Creates a new room.
+## Restricted to Local Admin or Admin roles.
+##
+## Request Body:
+##   - name         (string, required): Full room name (e.g. "A410")
+##   - description  (string, required): A description (e.g. "Informatikzimmer")
+##   - building     (string, required): Buildin in which the Room is located in
+##   - school_id    (UUID, optional): UUID of the school; only necessary if a admin creates a room
+##
+## Responses:
+##   200 OK - Room created successfully; returns the new room ID
+##   400 Bad Request - Missing required fields or invalid UUID format
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - Teacher, class, semester, or school UUID does not exist
+##   500 Internal Server Error - Database Query failed
+##
+# @name a410
+POST {{BASE}}/room
+Content-Type: application/json
+Accept: application/json
+
+
+{
+    "name": "A410",
+    "description": "Informatikzimmer",
+    "building": "Kraftaum",
+    "school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
+}
