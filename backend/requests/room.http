@@ -1,0 +1,21 @@
+### GET ROOMS
+## Returns a list of rooms. The result set is scoped
+## to the authenticated user's role:
+##   - Student -> only the rooms in the school
+##   - Teacher -> only the rooms in the school
+##   - Local Admin -> only the rooms in the school
+##   - Admin -> all rooms across all schools
+##
+## Response Body (200 OK) - Array of course objects, each containing:
+##   - id           (UUID): Unique identifier of the room
+##   - name         (string): Name of the room (e.g. "A410")
+##   - description  (string): A description (e.g. "Informatikzimmer")
+##   - building     (string): Buildin in which the Room is located in
+##   - school_id    (string): Unique identifier of the school the room is assigned to
+##
+## Responses:
+##   200 OK - Returns array of GetRoomResponse objects
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
+GET {{BASE}}/room
+Accept: application/json

@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::common::types::Room;
 
-type GetRoomResponse = Room;
+pub type GetRoomResponse = Room;
 
 #[derive(Deserialize)]
 pub struct CreateRoomRequest {
