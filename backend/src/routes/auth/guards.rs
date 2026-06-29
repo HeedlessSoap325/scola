@@ -6,7 +6,7 @@ use axum::{
 use chrono::{DateTime, Utc};
 use tower_cookies::Cookies;
 use uuid::Uuid;
-use crate::common::{state::AppState, types::{Person, PersonRole}};
+use crate::common::{error::AppError, state::AppState, types::{Person, PersonRole}};
 
 pub const SESSION_COOKIE: &str = "session_id";
 
@@ -89,10 +89,9 @@ pub enum AuthError {
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
-        let (status, message) = match self {
-            AuthError::MissingCookie => (StatusCode::FORBIDDEN, "Not logged in"),
-            AuthError::InvalidSession => (StatusCode::FORBIDDEN, "Session expired or invalid"),
-        };
-        (status, message).into_response()
+        match self {
+            AuthError::MissingCookie => AppError(StatusCode::FORBIDDEN, "Not logged in"),
+            AuthError::InvalidSession => AppError(StatusCode::FORBIDDEN, "Session expired or invalid"),
+        }.into_response()
     }
 }
