@@ -30,7 +30,7 @@ RUN --mount=type=bind,source=.sqlx,target=.sqlx \
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal
-# We use dhi.io/static for the final stage because itâs a minimal Docker Hardened Image runtime (basically âjust # enough OS to run the binaryâ), which helps keep the image small and with a lower attack surface compared to a # # full Alpine/Debian runtime.
+# We use dhi.io/static for the final stage because it's a minimal Docker Hardened Image runtime (basically âjust # enough OS to run the binaryâ), which helps keep the image small and with a lower attack surface compared to a # # full Alpine/Debian runtime.
 ################################################################################
 
 FROM dhi.io/static:20250419 AS final
