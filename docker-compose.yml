@@ -25,13 +25,10 @@ services:
     env_file:
       - ./.env
     environment:
-      PGUSER: ${POSTGRES_USER}
-      PGPASSWORD: ${POSTGRES_PASSWORD}
-      PGDATABASE: ${POSTGRES_USER}
-      DATABASE_URL: postgres://${BACKEND_DATABASE_USER}:${BACKEND_DATABASE_PASSWORD}@postgres:${POSTGRES_PORT}/${BACKEND_DATABASE_NAME}
+      DATABASE_URL: postgres://${BACKEND_DATABASE_USER}:${BACKEND_DATABASE_PASSWORD}@postgres:5432/${BACKEND_DATABASE_NAME}
     command: sqlx database setup
     volumes:
-      - ./migrations:/migrations
+      - ./backend/migrations:/migrations
     networks:
       - database
 
@@ -43,12 +40,12 @@ services:
         condition: service_completed_successfully
     container_name: backend
     build:
-      context: .
-      dockerfile: ./Dockerfile.backend
+      context: ./backend
+      dockerfile: ./backend/Dockerfile
     env_file:
       - ./.env
     environment:
-      DATABASE_URL: postgres://${BACKEND_DATABASE_USER}:${BACKEND_DATABASE_PASSWORD}@postgres:${POSTGRES_PORT}/${BACKEND_DATABASE_NAME}
+      DATABASE_URL: postgres://${BACKEND_DATABASE_USER}:${BACKEND_DATABASE_PASSWORD}@postgres:5432/${BACKEND_DATABASE_NAME}
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     networks:
