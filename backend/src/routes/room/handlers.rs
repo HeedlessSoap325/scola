@@ -1,8 +1,8 @@
-use axum::{Json, extract::State};
+use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::resolve_school, error::{AppError, db_error}, state::AppState, types::{PersonRole, ResourceResponse, Room}}, routes::{auth::guards::AuthUser, room::models::{CreateRoomRequest, GetRoomResponse}}};
+use crate::{common::{admin_auth::resolve_school, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Room}}, routes::{auth::guards::AuthUser, room::models::{CreateRoomRequest, GetRoomResponse, PatchRoomRequest}}};
 
 pub async fn get_rooms(
 	State(state): State<AppState>,
@@ -61,5 +61,43 @@ pub async fn add_room(
 
 	Ok(Json(ResourceResponse { 
 		resource_id: room.id 
+	}))
+}
+
+pub async fn edit_room(
+	State(state): State<AppState>,
+	user: AuthUser,
+	Path(room_id): Path<Uuid>,
+	Json(body): Json<PatchRoomRequest>,
+) -> Result<Json<GenericResponse>, AppError>
+{
+	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
+	
+	if user.role == PersonRole::LocalAdmin {
+		verify_ownership::<Room>(&state.pool, room_id, school_id).await?;
+	}
+
+	sqlx::query(
+		r#"
+			UPDATE room
+			SET
+				name = COALESCE($1, name),
+				description = COALESCE($2, description),
+				building = COALESCE($3, building)
+			WHERE id = $4
+			RETURNING *
+		"#
+	)
+	.bind(body.name)
+	.bind(body.description)
+	.bind(body.building)
+	.bind(room_id)
+	.fetch_optional(&state.pool)
+	.await
+	.map_err(db_error)?
+	.ok_or(AppError(StatusCode::NOT_FOUND, "Room entry not found"))?;
+
+	Ok(Json(GenericResponse { 
+		message: "Room updated".to_string() 
 	}))
 }

@@ -6,7 +6,7 @@
 ##   - Local Admin -> only the rooms in the school
 ##   - Admin -> all rooms across all schools
 ##
-## Response Body (200 OK) - Array of course objects, each containing:
+## Response Body (200 OK) - Array of room objects, each containing:
 ##   - id           (UUID): Unique identifier of the room
 ##   - name         (string): Name of the room (e.g. "A410")
 ##   - description  (string): A description (e.g. "Informatikzimmer")
@@ -50,4 +50,34 @@ Accept: application/json
     "description": "Informatikzimmer",
     "building": "Kraftaum",
     "school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
+}
+
+
+### EDIT A ROOM
+## Partially updates an existing room identified by its UUID in the path.
+## Only the fields provided in the request body will be updated (PATCH semantics).
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {room_id} (UUID): The UUID of the room to update
+##
+## Request Body (all fields optional - only included fields are updated):
+##   - name         (string, optional): New full room name
+##   - building     (string, optional): New building
+##   - description  (string, optional): New description text
+##   - school_id    (UUID, optional): UUID of the school; only necessary if a admin edits a room
+##
+## Responses:
+##   200 OK - Room updated successfully
+##   400 Bad Request - Invalid UUID format or malformed body
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - Room UUID does not exist
+##   500 Internal Server Error - Database Query failed
+PATCH {{BASE}}/room/{{a410.response.body.resource_id}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "building": "Gebäude B"
 }
