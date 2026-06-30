@@ -81,3 +81,21 @@ Accept: application/json
 {
     "building": "Gebäude B"
 }
+
+
+### DELETE A ROOM
+## Permanently deletes a room identified by its UUID in the path.
+## This action is irreversible. 
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {room_id} (UUID): The UUID of the room to delete
+##
+## Responses:
+##   200 OK - Room deleted successfully
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - Room UUID does not exist
+##   500 Internal Server Error - Database Query failed
+DELETE {{BASE}}/room/{{a410.response.body.resource_id}}
+Accept: application/json
