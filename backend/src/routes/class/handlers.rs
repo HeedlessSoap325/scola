@@ -1,4 +1,4 @@
-use axum::{Json, extract::{Path, State}};
+use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::{QueryBuilder};
 use uuid::Uuid;
 
@@ -63,7 +63,7 @@ pub async fn add_class(
 	State(state): State<AppState>, 
 	user: AuthUser, 
 	Json(body): Json<CreateClassRequest>,
-) -> Result<Json<ResourceResponse>, AppError> {
+) -> Result<ResourceResponse, AppError> {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
 	let class: Class = sqlx::query_as::<_, Class>(
@@ -85,16 +85,14 @@ pub async fn add_class(
 	.await
 	.map_err(db_error)?;
 
-	Ok(Json(ResourceResponse { 
-		resource_id: class.id,
-	}))
+	Ok(ResourceResponse(StatusCode::CREATED, class.id))
 }
 
 pub async fn delete_class(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Path(class_id): Path<Uuid>,
-) -> Result<Json<GenericResponse>, AppError> {
+) -> Result<GenericResponse, AppError> {
 	is_admin(&user)?;
 
 	if user.role == PersonRole::LocalAdmin {
@@ -112,9 +110,7 @@ pub async fn delete_class(
 	.await
 	.map_err(db_error)?;
 
-	Ok(Json( GenericResponse {
-		message: "Class deleted".to_string(),
-	}))
+	Ok(GenericResponse(StatusCode::OK, "Class deleted"))
 }
 
 pub async fn edit_class(
@@ -122,7 +118,7 @@ pub async fn edit_class(
 	user: AuthUser,
 	Path(class_id): Path<Uuid>,
 	Json(body): Json<PatchClassRequest>
-) -> Result<Json<GenericResponse>, AppError> {
+) -> Result<GenericResponse, AppError> {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
 	if user.role == PersonRole::LocalAdmin {
@@ -153,7 +149,5 @@ pub async fn edit_class(
 	.await
 	.map_err(db_error)?;
 
-	Ok(Json( GenericResponse { 
-		message: "Class updated".to_string()
-	}))
+	Ok(GenericResponse(StatusCode::OK, "Class updated"))
 }

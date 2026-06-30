@@ -37,7 +37,7 @@ pub async fn add_semester(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Json(body): Json<CreateSemesterRequest>,
-) -> Result<Json<ResourceResponse>, AppError>
+) -> Result<ResourceResponse, AppError>
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
@@ -59,9 +59,7 @@ pub async fn add_semester(
 	.await
 	.map_err(db_error)?;
 	
-	Ok(Json(ResourceResponse { 
-		resource_id: semester.id,
-	}))
+	Ok(ResourceResponse(StatusCode::CREATED, semester.id))
 }
 
 pub async fn edit_semester(
@@ -69,7 +67,7 @@ pub async fn edit_semester(
 	user: AuthUser,
 	Path(semester_id): Path<Uuid>,
 	Json(body): Json<PatchSemesterRequest>,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
@@ -97,16 +95,14 @@ pub async fn edit_semester(
 	.map_err(db_error)?
 	.ok_or(AppError(StatusCode::NOT_FOUND, "Semester not found"))?;
 
-	Ok(Json(GenericResponse { 
-		message: "Semester updated".to_string(),
-	}))
+	Ok(GenericResponse(StatusCode::OK, "Semester updated"))
 }
 
 pub async fn delete_semester(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Path(semester_id): Path<Uuid>,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
 	is_admin(&user)?;
 
@@ -127,7 +123,5 @@ pub async fn delete_semester(
     .map_err(db_error)?
     .ok_or(AppError(StatusCode::NOT_FOUND, "Semester not found"))?;
 
-	Ok(Json(GenericResponse { 
-		message: "Semester deleted".to_string(),
-	}))
+	Ok(GenericResponse(StatusCode::OK, "Semester deleted"))
 }

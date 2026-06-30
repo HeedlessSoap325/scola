@@ -23,7 +23,7 @@ pub async fn add_school(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Json(body): Json<CreateSchoolRequest>,
-) -> Result<Json<ResourceResponse>, AppError>
+) -> Result<ResourceResponse, AppError>
 {
 	if user.role != PersonRole::Admin {
 		return Err(AppError( StatusCode::UNAUTHORIZED, "Insufficient privileges" ));
@@ -46,9 +46,7 @@ pub async fn add_school(
 	.await
 	.map_err(db_error)?;
 
-	Ok(Json(ResourceResponse { 
-		resource_id: school.id 
-	}))
+	Ok(ResourceResponse(StatusCode::CREATED, school.id))
 }
 
 pub async fn edit_school(
@@ -56,7 +54,7 @@ pub async fn edit_school(
 	user: AuthUser,
 	Path(school_id): Path<Uuid>,
 	Json(body): Json<PatchSchoolRequest>,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
 	if user.role != PersonRole::Admin {
 		return Err(AppError( StatusCode::UNAUTHORIZED, "Insufficient privileges" ));
@@ -82,16 +80,14 @@ pub async fn edit_school(
     .map_err(db_error)?
     .ok_or(AppError(StatusCode::NOT_FOUND, "School not found"))?;
 
-	Ok(Json(GenericResponse { 
-		message: "School updated".to_string(),
-	}))
+	Ok(GenericResponse(StatusCode::OK, "School updated"))
 }
 
 pub async fn delete_school(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Path(school_id): Path<Uuid>,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
 	if user.role != PersonRole::Admin {
 		return Err(AppError( StatusCode::UNAUTHORIZED, "Insufficient privileges" ));
@@ -110,7 +106,5 @@ pub async fn delete_school(
     .map_err(db_error)?
     .ok_or(AppError(StatusCode::NOT_FOUND, "School not found"))?;
 
-	Ok(Json(GenericResponse { 
-		message: "School deleted".to_string(),
-	}))
+	Ok(GenericResponse(StatusCode::OK, "School deleted"))
 }

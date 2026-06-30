@@ -1,3 +1,4 @@
+use axum::{Json, http::StatusCode, response::{IntoResponse, Response}};
 use serde::Serialize;
 use sqlx::types::{BigDecimal, Uuid, chrono::{DateTime, NaiveDate, NaiveTime, Utc}};
 
@@ -153,12 +154,26 @@ pub struct LessonOverride {
     pub date: NaiveDate,
 }
 
-#[derive(Serialize)]
-pub struct GenericResponse {
-    pub message: String,
+pub struct GenericResponse(
+	pub StatusCode, 
+	pub &'static str,
+);
+
+impl IntoResponse for GenericResponse {
+    fn into_response(self) -> Response {
+        let body = Json(serde_json::json!({ "message": self.1 }));
+        (self.0, body).into_response()
+    }
 }
 
-#[derive(Serialize)]
-pub struct ResourceResponse {
-    pub resource_id: Uuid,
+pub struct ResourceResponse(
+    pub StatusCode,
+    pub Uuid,
+);
+
+impl IntoResponse for ResourceResponse {
+    fn into_response(self) -> Response {
+        let body = Json(serde_json::json!({ "resource_id": self.1 }));
+        (self.0, body).into_response()
+    }
 }

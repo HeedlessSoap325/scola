@@ -65,7 +65,7 @@ pub async fn add_course(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Json(body): Json<CreateCourseRequest>,
-) -> Result<Json<ResourceResponse>, AppError>
+) -> Result<ResourceResponse, AppError>
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
@@ -112,16 +112,14 @@ pub async fn add_course(
 	.await
 	.map_err(db_error)?;
 
-	Ok(Json(ResourceResponse { 
-		resource_id: course.id,
-	}))
+	Ok(ResourceResponse(StatusCode::CREATED, course.id))
 }
 
 pub async fn delete_course(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Path(course_id): Path<Uuid>,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
 	is_admin(&user)?;
 
@@ -142,9 +140,7 @@ pub async fn delete_course(
     .map_err(db_error)?
     .ok_or(AppError(StatusCode::NOT_FOUND, "Course not found"))?;
 
-	Ok(Json(GenericResponse { 
-		message: "Course deleted".to_string(),
-	}))
+	Ok(GenericResponse(StatusCode::OK, "Course deleted"))
 }
 
 pub async fn edit_course(
@@ -152,7 +148,7 @@ pub async fn edit_course(
 	user: AuthUser,
 	Path(course_id): Path<Uuid>,
 	Json(body): Json<PatchCourseRequest>
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
 	let school_id = resolve_school(&user, body.school_id, &state.pool).await?;
 
@@ -211,7 +207,5 @@ pub async fn edit_course(
     .map_err(db_error)?
     .ok_or(AppError(StatusCode::NOT_FOUND, "ClassToCourse entry not found"))?;
 
-	Ok(Json(GenericResponse { 
-		message: "Course updated".to_string(),
-	}))
+	Ok(GenericResponse(StatusCode::OK, "Course updated"))
 }

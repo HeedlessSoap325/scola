@@ -36,7 +36,7 @@ pub async fn add_room(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Json(body): Json<CreateRoomRequest>,
-) -> Result<Json<ResourceResponse>, AppError>
+) -> Result<ResourceResponse, AppError>
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
@@ -59,9 +59,7 @@ pub async fn add_room(
 	.map_err(db_error)?;
 
 
-	Ok(Json(ResourceResponse { 
-		resource_id: room.id 
-	}))
+	Ok(ResourceResponse(StatusCode::CREATED, room.id))
 }
 
 pub async fn edit_room(
@@ -69,7 +67,7 @@ pub async fn edit_room(
 	user: AuthUser,
 	Path(room_id): Path<Uuid>,
 	Json(body): Json<PatchRoomRequest>,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 	
@@ -97,16 +95,14 @@ pub async fn edit_room(
 	.map_err(db_error)?
 	.ok_or(AppError(StatusCode::NOT_FOUND, "Room entry not found"))?;
 
-	Ok(Json(GenericResponse { 
-		message: "Room updated".to_string() 
-	}))
+	Ok(GenericResponse(StatusCode::OK, "Room updated"))
 }
 
 pub async fn delete_room(
 	State(state): State<AppState>,
 	user: AuthUser,
 	Path(room_id): Path<Uuid>,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
 	is_admin(&user)?;
 
@@ -127,7 +123,5 @@ pub async fn delete_room(
     .map_err(db_error)?
     .ok_or(AppError(StatusCode::NOT_FOUND, "Room not found"))?;
 
-	Ok(Json(GenericResponse { 
-		message: "Room deleted".to_string(),
-	}))
+	Ok(GenericResponse(StatusCode::OK, "Room deleted"))
 }

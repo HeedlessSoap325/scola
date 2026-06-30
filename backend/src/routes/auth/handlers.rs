@@ -14,7 +14,7 @@ use crate::common::types::{GenericResponse, Person};
 use super::guards::{AuthUser, SESSION_COOKIE};
 use super::models::*;
 
-pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): Json<LoginRequest>) -> Result<Json<GenericResponse>, AppError> {
+pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): Json<LoginRequest>) -> Result<GenericResponse, AppError> {
     let person = sqlx::query_as::<_, Person>(
 		r#"
 			SELECT * FROM person p  where p.login_name = $1 and p.school_id = $2
@@ -59,10 +59,10 @@ pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): 
 
     cookies.private(&state.cookie_key).add(cookie);
 
-    Ok(Json(GenericResponse { message: "Logged in".into() }))
+    Ok(GenericResponse(StatusCode::OK, "Logged in"))
 }
 
-pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser) -> Json<GenericResponse> {
+pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser) -> GenericResponse {
     let private = cookies.private(&state.cookie_key);
 
     if let Some(session_cookie) = private.get(SESSION_COOKIE) {
@@ -77,14 +77,14 @@ pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser
         cookies.remove(removal);
     }
 
-    Json(GenericResponse { message: "Logged out".into() })
+    GenericResponse(StatusCode::OK, "Logged out")
 }
 
 pub async fn logout_all(
     State(state): State<AppState>,
     cookies: Cookies,
     user: AuthUser,
-) -> Result<Json<GenericResponse>, AppError>
+) -> Result<GenericResponse, AppError>
 {
     // Invalidate server-side sessions
     state.sessions.write().await.retain(|_, session| session.user_id != user.id);
@@ -94,9 +94,7 @@ pub async fn logout_all(
     removal.set_path("/");
     cookies.remove(removal);
 
-    Ok(Json(GenericResponse { 
-        message: "Logged out".into(),
-    }))
+    Ok(GenericResponse(StatusCode::OK, "Logged out"))
 }
 
 pub async fn me(auth: AuthUser) -> Result<Json<MeResponse>, AppError> {
