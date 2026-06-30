@@ -25,7 +25,7 @@ Accept: application/json
 ##   - address      (string, required): Address of the school
 ##
 ## Responses:
-##   200 OK - School created successfully; returns the new school ID
+##   201 Created - School created successfully; returns the new school ID
 ##   400 Bad Request - Missing required fields or invalid UUID format
 ##   401 Unauthorized - Insufficient permissions for this role
 ##   403 Forbidden - No active session

@@ -49,7 +49,7 @@ Accept: application/json
 ##   - school_id    (UUID, optional): UUID of the school; only necessary if a admin creates a course
 ##
 ## Responses:
-##   200 OK - Course created successfully; returns the new course object or its ID
+##   201 Created - Course created successfully; returns the new course ID
 ##   400 Bad Request - Missing required fields or invalid UUID format
 ##   401 Unauthorized - Insufficient permissions for this role
 ##   403 Forbidden - No active session

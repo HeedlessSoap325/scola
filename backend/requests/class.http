@@ -36,7 +36,7 @@ Accept: application/json
 ##   - school_id    (UUID, optional): UUID of the school; only necessary if a admin creates a class
 ##
 ## Responses:
-##   200  OK - Class created successfully; returns the id of the created class
+##   201 Created- Class created successfully; returns the id of the created class
 ##   400 Bad Request - Missing required fields or invalid UUID format
 ##   401 Unauthorized - Insufficient permissions for this role
 ##   403 Forbidden - No active session

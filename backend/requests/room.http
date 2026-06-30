@@ -32,7 +32,7 @@ Accept: application/json
 ##   - school_id    (UUID, optional): UUID of the school; only necessary if a admin creates a room
 ##
 ## Responses:
-##   200 OK - Room created successfully; returns the new room ID
+##   201 Created - Room created successfully; returns the new room ID
 ##   400 Bad Request - Missing required fields or invalid UUID format
 ##   401 Unauthorized - Insufficient permissions for this role
 ##   403 Forbidden - No active session
