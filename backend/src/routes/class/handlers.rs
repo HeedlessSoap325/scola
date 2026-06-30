@@ -95,24 +95,10 @@ pub async fn delete_class(
 	user: AuthUser,
 	Path(class_id): Path<Uuid>,
 ) -> Result<Json<GenericResponse>, AppError> {
-	let class = sqlx::query_as::<_, Class>(
-        r#"
-            SELECT 
-				* 
-			FROM class c
-            WHERE c.id = $1
-        "#,
-    )
-    .bind(class_id)
-    .fetch_one(&state.pool)
-    .await
-    .map_err(db_error)?;
+	is_admin(&user)?;
 
-	if (user.role != PersonRole::LocalAdmin || class.school_id != user.school_id ) && user.role != PersonRole::Admin {
-		return Err( AppError(
-			StatusCode::UNAUTHORIZED,
-			"Your privileges are not sufficient to perform this operation",
-		));
+	if user.role == PersonRole::LocalAdmin {
+		verify_ownership::<Class>(&state.pool, class_id, user.school_id).await?
 	}
 
 	sqlx::query(
