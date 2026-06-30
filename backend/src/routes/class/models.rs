@@ -34,4 +34,5 @@ pub struct PatchClassRequest {
 	pub abbreviation: Option<String>,
     pub description: Option<String>,
 	pub teacher: Option<Uuid>,
+	pub school_id: Option<Uuid>,
 }
