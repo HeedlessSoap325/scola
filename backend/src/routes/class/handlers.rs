@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::{QueryBuilder};
 use uuid::Uuid;
 
-use crate::{common::{error::{AppError, db_error}, state::AppState, types::{Class, GenericResponse, PersonRole, ResourceResponse}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{Class, GenericResponse, PersonRole, ResourceResponse, Teacher}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
 
 pub async fn get_classes(
 	State(state): State<AppState>, 
@@ -64,37 +64,12 @@ pub async fn add_class(
 	user: AuthUser, 
 	Json(body): Json<CreateClassRequest>,
 ) -> Result<Json<ResourceResponse>, AppError> {
-	if user.role != PersonRole::LocalAdmin && user.role != PersonRole::Admin {
-		return Err( AppError(
-			StatusCode::UNAUTHORIZED,
-			"Your privileges are not sufficient to perform this operation",
-		));
-	}
-
-	let school_id = if user.role == PersonRole::LocalAdmin {
-		user.school_id
-	} else {
-		if !body.school_id.is_some() {
-			return Err( AppError(
-				StatusCode::BAD_REQUEST,
-				"school_id must be provided if a admin creates a class",
-			));
-		}
-
-		body.school_id.unwrap()
-	};
+	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
 	let class: Class = sqlx::query_as::<_, Class>(
 		r#"
 			INSERT INTO class 
-			(
-				id, 
-				school_id, 
-				teacher_id, 
-				name, 
-				abbreviation, 
-				description
-			) 
+			(id, school_id, teacher_id, name, abbreviation, description) 
 			VALUES
 			($1, $2, $3, $4, $5, $6)
 			RETURNING *
