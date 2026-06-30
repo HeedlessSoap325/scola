@@ -1,4 +1,4 @@
-use axum::{Json, extract::{Path, State}, http::StatusCode};
+use axum::{Json, extract::{Path, State}};
 use sqlx::{QueryBuilder};
 use uuid::Uuid;
 
@@ -123,60 +123,32 @@ pub async fn edit_class(
 	Path(class_id): Path<Uuid>,
 	Json(body): Json<PatchClassRequest>
 ) -> Result<Json<GenericResponse>, AppError> {
-	let class = sqlx::query_as::<_, Class>(
-        r#"
-            SELECT 
-				* 
-			FROM class c
-            WHERE c.id = $1
-        "#,
-    )
-    .bind(class_id)
-    .fetch_one(&state.pool)
-    .await
-    .map_err(db_error)?;
+	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
-	if (user.role != PersonRole::LocalAdmin || class.school_id != user.school_id ) && user.role != PersonRole::Admin {
-		return Err( AppError(
-			StatusCode::UNAUTHORIZED,
-			"Your privileges are not sufficient to perform this operation",
-		));
-	}
+	if user.role == PersonRole::LocalAdmin {
+		verify_ownership::<Class>(&state.pool, class_id, school_id).await?;
 
-	let mut new_class: Class = class.clone();
-
-	if body.name.is_some() {
-		new_class.name = body.name.unwrap();
-	}
-
-	if body.abbreviation.is_some() {
-		new_class.abbreviation = body.abbreviation.unwrap();
-	}
-
-	if body.description.is_some() {
-		new_class.description = body.description.unwrap();
-	}
-
-	if body.teacher.is_some() {
-		new_class.teacher_id = body.teacher.unwrap();
+		if let Some(teacher_id) = body.teacher {
+            verify_ownership::<Teacher>(&state.pool, teacher_id, school_id).await?;
+        }
 	}
 
 	sqlx::query(
 		r#"
 			UPDATE class c
 			SET
-				teacher_id = $1,
-				name = $2,
-				abbreviation = $3,
-				description = $4
+				teacher_id   = COALESCE($1, teacher_id),
+				name         = COALESCE($2, name),
+				abbreviation = COALESCE($3, abbreviation),
+				description  = COALESCE($4, description)	
 			WHERE c.id = $5
 		"#
 	)
-	.bind(new_class.teacher_id)
-	.bind(new_class.name)
-	.bind(new_class.abbreviation)
-	.bind(new_class.description)
-	.bind(new_class.id)
+	.bind(body.teacher)
+	.bind(body.name)
+	.bind(body.abbreviation)
+	.bind(body.description)
+	.bind(class_id)
 	.execute(&state.pool)
 	.await
 	.map_err(db_error)?;
