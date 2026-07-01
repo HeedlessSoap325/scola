@@ -1,5 +1,5 @@
 use bigdecimal::BigDecimal;
-use chrono::NaiveTime;
+use chrono::NaiveDate;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -13,7 +13,7 @@ pub struct CreateGradeRequest {
     pub student_id: Uuid,
     pub value: BigDecimal,
     pub weight: BigDecimal,
-    pub date: NaiveTime,
+    pub date: NaiveDate,
 	pub school_id: Option<Uuid>,
 }
 
@@ -22,6 +22,6 @@ pub struct PatchGradeRequest {
     pub student_id: Option<Uuid>,
     pub value: Option<BigDecimal>,
     pub weight: Option<BigDecimal>,
-    pub date: Option<NaiveTime>,
+    pub date: Option<NaiveDate>,
 	pub school_id: Option<Uuid>,
 }

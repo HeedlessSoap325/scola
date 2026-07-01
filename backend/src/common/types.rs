@@ -72,7 +72,7 @@ pub struct Grade {
     pub student_id: Uuid,
     pub value: BigDecimal,
     pub weight: BigDecimal,
-    pub date: NaiveTime,
+    pub date: NaiveDate,
 }
 
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
