@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::delete_resource, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Room}}, routes::{auth::guards::AuthUser, room::models::{CreateRoomRequest, GetRoomResponse, PatchRoomRequest}}};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::{create_resource, delete_resource}, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Room}}, routes::{auth::guards::AuthUser, room::models::{CreateRoomRequest, GetRoomResponse, PatchRoomRequest}}};
 
 pub async fn get_rooms(
 	State(state): State<AppState>,
@@ -40,24 +40,14 @@ pub async fn add_room(
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
-	let room = sqlx::query_as::<_, Room>(
-		r#"
-			INSERT INTO room
-			(id, school_id, name, description, building)
-			VALUES
-			($1, $2, $3, $4, $5)
-			RETURNING *
-		"#
-	)
-	.bind(Uuid::new_v4())
-	.bind(school_id)
-	.bind(body.name)
-	.bind(body.description)
-	.bind(body.building)
-	.fetch_one(&state.pool)
-	.await
-	.map_err(db_error)?;
-
+	let room: Room = Room {
+		id: Uuid::new_v4(),
+		school_id: school_id,
+		name: body.name,
+		description: body.description,
+		building: body.building,
+	};
+	create_resource::<Room>(&state.pool, room.clone()).await?;
 
 	Ok(ResourceResponse(StatusCode::CREATED, room.id))
 }

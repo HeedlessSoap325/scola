@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::delete_resource, state::AppState, types::{Class, Course, GenericResponse, PersonRole, ResourceResponse, Semester, Teacher}}, routes::{auth::guards::AuthUser, course::models::{CreateCourseRequest, GetCourseRequest, GetCourseResponse, PatchCourseRequest}}, verify_ownerships};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::{create_resource, delete_resource}, state::AppState, types::{Class, ClassToCourse, Course, GenericResponse, PersonRole, ResourceResponse, Semester, Teacher}}, routes::{auth::guards::AuthUser, course::models::{CreateCourseRequest, GetCourseRequest, GetCourseResponse, PatchCourseRequest}}, verify_ownerships};
 
 pub async fn get_courses(
 	State(state): State<AppState>,
@@ -78,39 +78,22 @@ pub async fn add_course(
 		);
 	}
 
-	let course: Course = sqlx::query_as::<_, Course>(
-		r#"
-			INSERT INTO course
-			(id, teacher_id, school_id, name, abbreviation, description)
-			VALUES
-			($1, $2, $3, $4, $5, $6)
-			RETURNING *
-		"#
-	)
-	.bind(Uuid::new_v4())
-	.bind(body.teacher)
-	.bind(school_id)
-	.bind(body.name)
-	.bind(body.abbreviation)
-	.bind(body.description)
-	.fetch_one(&state.pool)
-	.await
-	.map_err(db_error)?;
+	let course: Course = Course { 
+		id: Uuid::new_v4(), 
+		school_id: school_id, 
+		teacher_id: body.teacher, 
+		name: body.name, 
+		abbreviation: body.abbreviation, 
+		description: body.description,
+	};
+	create_resource::<Course>(&state.pool, course.clone()).await?;
 
-	sqlx::query(
-		r#"
-			INSERT INTO "classToCourse"
-			(class_id, course_id, semester_id)
-			VALUES
-			($1, $2, $3)
-		"#
-	)
-	.bind(body.class)
-	.bind(course.id)
-	.bind(body.semester)
-	.execute(&state.pool)
-	.await
-	.map_err(db_error)?;
+	let class_to_course: ClassToCourse = ClassToCourse { 
+		class_id: body.class, 
+		course_id: course.id, 
+		semester_id: body.semester, 
+	};
+	create_resource::<ClassToCourse>(&state.pool, class_to_course).await?;
 
 	Ok(ResourceResponse(StatusCode::CREATED, course.id))
 }

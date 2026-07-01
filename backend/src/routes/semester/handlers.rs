@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::delete_resource, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Semester}}, routes::{auth::guards::AuthUser, semester::models::{CreateSemesterRequest, GetSemesterResponse, PatchSemesterRequest}}};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::{create_resource, delete_resource}, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Semester}}, routes::{auth::guards::AuthUser, semester::models::{CreateSemesterRequest, GetSemesterResponse, PatchSemesterRequest}}};
 
 pub async fn get_semesters(
 	State(state): State<AppState>,
@@ -41,23 +41,14 @@ pub async fn add_semester(
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
-	let semester: Semester = sqlx::query_as::<_, Semester>(
-		r#"
-			INSERT INTO semester
-			(id, school_id, name, start_date, end_date)
-			VALUES
-			($1, $2, $3, $4, $5)
-			RETURNING *
-		"#
-	)
-	.bind(Uuid::new_v4())
-	.bind(school_id)
-	.bind(body.name)
-	.bind(body.start_date)
-	.bind(body.end_date)
-	.fetch_one(&state.pool)
-	.await
-	.map_err(db_error)?;
+	let semester: Semester = Semester { 
+		id: Uuid::new_v4(), 
+		school_id: school_id, 
+		name: body.name, 
+		start_date: body.start_date, 
+		end_date: body.end_date,
+	};
+	create_resource::<Semester>(&state.pool, semester.clone()).await?;
 	
 	Ok(ResourceResponse(StatusCode::CREATED, semester.id))
 }

@@ -1,7 +1,7 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
 use uuid::Uuid;
 
-use crate::{common::{error::{AppError, db_error}, sql::delete_resource, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, school::models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}};
+use crate::{common::{error::{AppError, db_error}, sql::{create_resource, delete_resource}, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, school::models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}};
 
 pub async fn get_schools(
 	State(state): State<AppState>,
@@ -29,22 +29,13 @@ pub async fn add_school(
 		return Err(AppError( StatusCode::UNAUTHORIZED, "Insufficient privileges" ));
 	}
 
-	let school = sqlx::query_as::<_, School>(
-		r#"
-			INSERT INTO school
-			(id, name, abbreviation, address)
-			VALUES
-			($1, $2, $3, $4)
-			RETURNING *
-		"#
-	)
-	.bind(Uuid::new_v4())
-	.bind(body.name)
-	.bind(body.abbreviation)
-	.bind(body.address)
-	.fetch_one(&state.pool)
-	.await
-	.map_err(db_error)?;
+	let school: School = School { 
+		id: Uuid::new_v4(), 
+		name: body.name, 
+		abbreviation: body.abbreviation, 
+		address: body.address,
+	};
+	create_resource::<School>(&state.pool, school.clone()).await?;
 
 	Ok(ResourceResponse(StatusCode::CREATED, school.id))
 }

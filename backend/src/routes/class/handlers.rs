@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::{QueryBuilder};
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::delete_resource, state::AppState, types::{Class, GenericResponse, PersonRole, ResourceResponse, Teacher}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::{create_resource, delete_resource}, state::AppState, types::{Class, GenericResponse, PersonRole, ResourceResponse, Teacher}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
 
 pub async fn get_classes(
 	State(state): State<AppState>, 
@@ -66,24 +66,15 @@ pub async fn add_class(
 ) -> Result<ResourceResponse, AppError> {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
-	let class: Class = sqlx::query_as::<_, Class>(
-		r#"
-			INSERT INTO class 
-			(id, school_id, teacher_id, name, abbreviation, description) 
-			VALUES
-			($1, $2, $3, $4, $5, $6)
-			RETURNING *
-		"#
-	)
-	.bind(Uuid::new_v4())
-	.bind(school_id)
-	.bind(body.teacher)
-	.bind(body.name)
-	.bind(body.abbreviation)
-	.bind(body.description)
-	.fetch_one(&state.pool)
-	.await
-	.map_err(db_error)?;
+	let class = Class {
+		id: Uuid::new_v4(),
+		school_id: school_id,
+		teacher_id: body.teacher,
+		name: body.name,
+		abbreviation: body.abbreviation,
+		description: body.description,
+	};
+	create_resource::<Class>(&state.pool, class.clone()).await?;
 
 	Ok(ResourceResponse(StatusCode::CREATED, class.id))
 }
