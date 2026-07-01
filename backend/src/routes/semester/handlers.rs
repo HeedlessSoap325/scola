@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Semester}}, routes::{auth::guards::AuthUser, semester::models::{CreateSemesterRequest, GetSemesterResponse, PatchSemesterRequest}}};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::delete_resource, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Semester}}, routes::{auth::guards::AuthUser, semester::models::{CreateSemesterRequest, GetSemesterResponse, PatchSemesterRequest}}};
 
 pub async fn get_semesters(
 	State(state): State<AppState>,
@@ -110,18 +110,7 @@ pub async fn delete_semester(
 		verify_ownership::<Semester>(&state.pool, semester_id, user.school_id).await?;
 	}
 
-	sqlx::query(
-		r#"
-			DELETE FROM semester s
-			WHERE s.id = $1
-			RETURNING *
-		"#
-	)
-	.bind(semester_id)
-	.fetch_optional(&state.pool)
-    .await
-    .map_err(db_error)?
-    .ok_or(AppError(StatusCode::NOT_FOUND, "Semester not found"))?;
+	delete_resource::<Semester>(&state.pool, semester_id).await?;
 
 	Ok(GenericResponse(StatusCode::OK, "Semester deleted"))
 }

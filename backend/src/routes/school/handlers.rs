@@ -1,7 +1,7 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
 use uuid::Uuid;
 
-use crate::{common::{error::{AppError, db_error}, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, school::models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}};
+use crate::{common::{error::{AppError, db_error}, sql::delete_resource, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, School}}, routes::{auth::guards::AuthUser, school::models::{CreateSchoolRequest, GetSchoolResponse, PatchSchoolRequest}}};
 
 pub async fn get_schools(
 	State(state): State<AppState>,
@@ -93,18 +93,7 @@ pub async fn delete_school(
 		return Err(AppError( StatusCode::UNAUTHORIZED, "Insufficient privileges" ));
 	}
 
-	sqlx::query(
-		r#"
-			DELETE FROM school s
-			WHERE s.id = $1
-			RETURNING *
-		"#
-	)
-	.bind(school_id)
-	.fetch_optional(&state.pool)
-    .await
-    .map_err(db_error)?
-    .ok_or(AppError(StatusCode::NOT_FOUND, "School not found"))?;
+	delete_resource::<School>(&state.pool, school_id).await?;
 
 	Ok(GenericResponse(StatusCode::OK, "School deleted"))
 }

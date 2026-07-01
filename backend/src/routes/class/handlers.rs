@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::{QueryBuilder};
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{Class, GenericResponse, PersonRole, ResourceResponse, Teacher}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::delete_resource, state::AppState, types::{Class, GenericResponse, PersonRole, ResourceResponse, Teacher}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
 
 pub async fn get_classes(
 	State(state): State<AppState>, 
@@ -99,16 +99,7 @@ pub async fn delete_class(
 		verify_ownership::<Class>(&state.pool, class_id, user.school_id).await?
 	}
 
-	sqlx::query(
-		r#"
-			DELETE FROM class c
-			WHERE c.id = $1
-		"#
-	)
-	.bind(class_id).
-	execute(&state.pool)
-	.await
-	.map_err(db_error)?;
+	delete_resource::<Class>(&state.pool, class_id).await?;
 
 	Ok(GenericResponse(StatusCode::OK, "Class deleted"))
 }

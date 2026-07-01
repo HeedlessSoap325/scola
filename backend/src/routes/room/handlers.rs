@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Room}}, routes::{auth::guards::AuthUser, room::models::{CreateRoomRequest, GetRoomResponse, PatchRoomRequest}}};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::delete_resource, state::AppState, types::{GenericResponse, PersonRole, ResourceResponse, Room}}, routes::{auth::guards::AuthUser, room::models::{CreateRoomRequest, GetRoomResponse, PatchRoomRequest}}};
 
 pub async fn get_rooms(
 	State(state): State<AppState>,
@@ -110,18 +110,7 @@ pub async fn delete_room(
 		verify_ownership::<Room>(&state.pool, room_id, user.school_id).await?;
 	}
 
-	sqlx::query(
-		r#"
-			DELETE FROM room r
-			WHERE r.id = $1
-			RETURNING *
-		"#
-	)
-	.bind(room_id)
-	.fetch_optional(&state.pool)
-    .await
-    .map_err(db_error)?
-    .ok_or(AppError(StatusCode::NOT_FOUND, "Room not found"))?;
+	delete_resource::<Room>(&state.pool, room_id).await?;
 
 	Ok(GenericResponse(StatusCode::OK, "Room deleted"))
 }

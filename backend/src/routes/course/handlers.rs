@@ -2,7 +2,7 @@ use axum::{Json, extract::{Path, State}, http::StatusCode};
 use sqlx::QueryBuilder;
 use uuid::Uuid;
 
-use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, state::AppState, types::{Class, Course, GenericResponse, PersonRole, ResourceResponse, Semester, Teacher}}, routes::{auth::guards::AuthUser, course::models::{CreateCourseRequest, GetCourseRequest, GetCourseResponse, PatchCourseRequest}}, verify_ownerships};
+use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, ownership::verify_ownership, sql::delete_resource, state::AppState, types::{Class, Course, GenericResponse, PersonRole, ResourceResponse, Semester, Teacher}}, routes::{auth::guards::AuthUser, course::models::{CreateCourseRequest, GetCourseRequest, GetCourseResponse, PatchCourseRequest}}, verify_ownerships};
 
 pub async fn get_courses(
 	State(state): State<AppState>,
@@ -127,18 +127,7 @@ pub async fn delete_course(
 		verify_ownership::<Course>(&state.pool, course_id, user.school_id).await?;
 	}
 
-	sqlx::query(
-		r#"
-			DELETE FROM course c
-			WHERE c.id = $1
-			RETURNING *
-		"#
-	)
-	.bind(course_id)
-	.fetch_optional(&state.pool)
-    .await
-    .map_err(db_error)?
-    .ok_or(AppError(StatusCode::NOT_FOUND, "Course not found"))?;
+	delete_resource::<Course>(&state.pool, course_id).await?;
 
 	Ok(GenericResponse(StatusCode::OK, "Course deleted"))
 }
