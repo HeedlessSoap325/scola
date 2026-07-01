@@ -1,0 +1,18 @@
+### GET GRADES
+## Returns a list of grades.
+## This is only a valid operation for students.
+##
+## Response Body (200 OK) - Array of grade objects, each containing:
+##   - id          (UUID): Unique identifier of the grade
+##   - student_id  (string): Unique identifier of the student
+##   - value       (string): The grade (e.g 4.56)
+##   - weight      (string): The weight of the grade (e.g. 0.5)
+##   - date        (string): The date on which the grade was issued
+##
+## Responses:
+##   200 OK - Returns array of GetGradeResponse objects
+##   403 Forbidden - No active session
+##   4000 Bad REquest - You are not a student
+##   500 Internal Server Error - Database Query failed
+GET {{BASE}}/grade
+Accept: application/json
