@@ -50,7 +50,7 @@ pub struct Teacher {
     pub phone: String,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize, Default)]
 pub struct Class {
     pub id: Uuid,
     pub school_id: Uuid,

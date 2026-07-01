@@ -23,6 +23,14 @@
 GET {{BASE}}/class
 Accept: application/json
 
+### GET CLASSES
+## Get all classes, where the name of the class contains an "a"
+##
+## "name" references the name of the Class struct inside common::types. 
+## Only string and Uuid fields can be filtered
+GET {{BASE}}/class?name=a
+Accept: application/json
+
 
 ### CREATE A CLASS
 ## Creates a new class within the authenticated user's school.
