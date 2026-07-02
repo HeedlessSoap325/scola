@@ -1,0 +1,9 @@
+GET {{BASE}}/timetable?class_name=1e
+Content-Type: application/json
+
+
+{
+	"semester_id": "a8a31a4d-abce-48d2-82f0-555f15e27694",
+	"start": "2026-07-02",
+	"end": "2026-07-09"
+}
