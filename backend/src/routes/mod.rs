@@ -5,3 +5,4 @@ pub mod school;
 pub mod semester;
 pub mod room;
 pub mod grade;
+pub mod timetable;
