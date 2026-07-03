@@ -1,3 +1,37 @@
+### GET TIMETABLE
+## Returns a list of lessons filtered by semester, start and end date.
+##
+## NOTICE: Admin role is not yet supported to get timetable information
+##
+## Request Body:
+##   - semester_id (UUID, required): The UUID of the semester to filter courses by
+##   - start       (Date, required): The date from which on to query lessons
+##   - end         (Date, required): The date to which to query lessons
+##
+## Response Body (200 OK) - Array of course objects, each containing:
+##   - lesson_id             (UUID, filterable): The UUID of the lesson
+## 	 - lesson_date           (Date): The date on which the lesson will take place (can potenially be out of start-end)
+## 	 - lesson_status         (LessonStatus | null): The status of the lession (e.g. moved, reservation, etc.) or null if unmodified
+## 	 - lesson_start          (Time, filterable): The start time of the lesson
+## 	 - lesson_end            (Time, filterable): The end time of the lesson
+## 	 - room_id               (UUID, filterable): The UUID of the room
+## 	 - room_name             (String, filterable): The name of the room
+## 	 - course_id             (UUID, filterable): The UUID of the course
+## 	 - course_name           (String, filterable): The name of the course (e.g. Französisch)
+## 	 - course_abbreviation   (String, filterable): The course abbreviation (e.g. F)
+## 	 - teacher_id            (UUID, filterable): The UUID of the teacher
+## 	 - teacher_abbreviation  (String, filterable): The teachers abbreviation (e.g. MM)
+## 	 - teacher_first_name    (String, filterable): The teachers first name
+## 	 - teacher_last_name     (String, filterable): The teachers last name
+## 	 - class_id              (UUID, filterable): The UUID of the class
+## 	 - class_abbreviation    (String, filterable): The abbereviation of the class (e.g 1e)
+## 	 - class_name            (String, filterable): THe name of the class (e.g. 1e)
+##
+## Responses:
+##   200 OK - Returns array of GetTimetableResponse objects
+##   400 Bad Request -  Invalid body or missing parts of body
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/timetable?class_name=1e
 Content-Type: application/json
 
