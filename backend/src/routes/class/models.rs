@@ -9,7 +9,7 @@ pub struct GetClassStudent {
 	pub email: String
 }
 
-#[derive(sqlx::FromRow, serde::Serialize)]
+#[derive(sqlx::FromRow, serde::Serialize, Default)]
 pub struct GetClassResponse {
     pub class_name: String,
     pub class_abbreviation: String,

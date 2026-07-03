@@ -6,11 +6,11 @@
 ##   - Admin -> all classes across all schools
 ##
 ## Response Body (200 OK) - Array of class objects, each containing:
-##   - class_name         (string): Full name of the class (e.g. "26dW")
-##   - class_abbreviation (string): Short identifier (e.g. "1dW")
-##   - teacher_first_name (string): First name of the responsible teacher
-##   - teacher_last_name  (string): Last name of the responsible teacher
-##   - teacher_email      (string): Email address of the responsible teacher
+##   - class_name         (string, filterable): Full name of the class (e.g. "26dW")
+##   - class_abbreviation (string, filterable): Short identifier (e.g. "1dW")
+##   - teacher_first_name (string, filterable): First name of the responsible teacher
+##   - teacher_last_name  (string, filterable): Last name of the responsible teacher
+##   - teacher_email      (string, filterable): Email address of the responsible teacher
 ##   - persons            (array): List of students in the class, each with:
 ##       - first_name (string): Student's first name
 ##       - last_name  (string): Student's last name

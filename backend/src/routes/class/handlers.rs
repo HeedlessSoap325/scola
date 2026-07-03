@@ -1,5 +1,5 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
-use sqlx::{Execute, QueryBuilder};
+use sqlx::QueryBuilder;
 use uuid::Uuid;
 
 use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, extractors::Filter, ownership::verify_ownership, sql::{create_resource, delete_resource}, state::AppState, types::{Class, GenericResponse, PersonRole, ResourceResponse, Teacher}}, routes::{auth::guards::AuthUser, class::models::{CreateClassRequest, GetClassResponse, PatchClassRequest}}};
@@ -7,11 +7,11 @@ use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, d
 pub async fn get_classes(
 	State(state): State<AppState>,
 	user: AuthUser,
-	filter: Filter<Class>,
+	filter: Filter<GetClassResponse>,
 ) -> Result<Json<Vec<GetClassResponse>>, AppError> 
 {
 	let mut builder = QueryBuilder::new(
-        r#"
+        r#" WITH classes AS (
             SELECT
                 c.name AS class_name,
                 c.abbreviation AS class_abbreviation,
@@ -46,15 +46,17 @@ pub async fn get_classes(
         }
 		PersonRole::Admin => {} // no filter
     };
+	builder.push(r#" 
+			GROUP BY c.id, c.name, c.abbreviation, tp.id, tp.first_name, tp.last_name, tp.email 
+		)
+		SELECT * FROM classes"#
+	);
 
 	if !filter.is_empty() { // Only if filter arguments pwere passed use them
-		builder.push(" AND ");
+		builder.push(" WHERE ");
 		filter.apply(&mut builder);
 	}
 
-    builder.push(
-		" GROUP BY c.id, c.name, c.abbreviation, tp.id, tp.first_name, tp.last_name, tp.email"
-	);
 
 	let calsses = builder
 		.build_query_as::<GetClassResponse>()
