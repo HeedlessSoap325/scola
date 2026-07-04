@@ -10,7 +10,7 @@ services:
       - postgres_data:/var/lib/postgresql
       - ./init-docker.sh:/docker-entrypoint-initdb.d/init.sh
     networks:
-      - database
+      - postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_USER"]
       interval: 5s
@@ -30,7 +30,7 @@ services:
     volumes:
       - ./backend/migrations:/migrations
     networks:
-      - database
+      - postgres
 
   valkey:
     image: valkey/valkey:latest
@@ -48,7 +48,7 @@ services:
         --save 60 1 
         --user ${BACKEND_VALKEY_USER} on >${BACKEND_VALKEY_PASSWORD} db=${BACKEND_VALKEY_DATABASE} allkeys nocommands +get +set +del
     networks:
-      - database
+      - valkey
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
       interval: 5s
@@ -76,11 +76,13 @@ services:
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     networks:
-      - database
+      - postgres
+      - valkey
 
 volumes:
   postgres_data:
   valkey_data:
 
 networks:
-  database:
+  postgres:
+  valkey:
