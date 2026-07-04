@@ -32,12 +32,38 @@ services:
     networks:
       - database
 
+  valkey:
+    image: valkey/valkey:latest
+    container_name: Valkey
+    env_file:
+      - ./.env
+    ports:
+      - "${VALKEY_PORT}:6379"
+    volumes:
+      - valkey_data:/data
+    environment:
+      # save all 60s, if at least 1 key was changed
+      # create the specified user and the specified password
+      VALKEY_EXTRA_FLAGS: >-
+        --save 60 1 
+        --user ${BACKEND_VALKEY_USER} on >${BACKEND_VALKEY_PASSWORD} db=${BACKEND_VALKEY_DATABASE} allkeys nocommands +get +set +del
+    networks:
+      - database
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
   backend:
     depends_on:
       postgres:
         condition: service_healthy
       migrator:
         condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
     container_name: backend
     build:
       context: ./backend
@@ -46,6 +72,7 @@ services:
       - ./.env
     environment:
       DATABASE_URL: postgres://${BACKEND_DATABASE_USER}:${BACKEND_DATABASE_PASSWORD}@postgres:5432/${BACKEND_DATABASE_NAME}
+      REDIS_URL: valkey://${BACKEND_VALKEY_USER}:${BACKEND_VALKEY_PASSWORD}@valkey:6379/${BACKEND_VALKEY_DATABASE}
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     networks:
@@ -53,6 +80,7 @@ services:
 
 volumes:
   postgres_data:
+  valkey_data:
 
 networks:
   database:
