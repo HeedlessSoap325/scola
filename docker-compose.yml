@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: postgres
+    container_name: Scola-Postgres
     env_file:
       - ./.env
     ports:
@@ -34,7 +34,7 @@ services:
 
   valkey:
     image: valkey/valkey:latest
-    container_name: Valkey
+    container_name: Scola-Valkey
     env_file:
       - ./.env
     ports:
@@ -64,7 +64,7 @@ services:
         condition: service_completed_successfully
       valkey:
         condition: service_healthy
-    container_name: backend
+    container_name: Scola-Backend
     build:
       context: ./backend
       dockerfile: ./Dockerfile
