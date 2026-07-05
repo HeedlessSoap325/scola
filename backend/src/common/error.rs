@@ -1,4 +1,6 @@
 use axum::{Json, http::StatusCode, response::{IntoResponse, Response}};
+use deadpool_redis::PoolError;
+use redis::RedisError;
 
 pub struct AppError(
 	pub StatusCode, 
@@ -72,4 +74,14 @@ fn sqlx_error_message(err: sqlx::Error) -> String {
             format!("Query failed: {}", err)
         },
     }
+}
+
+pub fn redis_pool_error(e: PoolError) -> AppError {
+    println!("[Redis] {}", e.to_string());  
+    AppError(StatusCode::INTERNAL_SERVER_ERROR, "Pool error")
+}
+
+pub fn redis_error(e: RedisError) -> AppError {
+    println!("[Redis] {}", e.to_string());  
+    AppError(StatusCode::INTERNAL_SERVER_ERROR, "Redis error")
 }

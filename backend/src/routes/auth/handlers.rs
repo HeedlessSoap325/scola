@@ -9,6 +9,7 @@ use tower_cookies::Cookies;
 use uuid::Uuid;
 
 use crate::common::error::AppError;
+use crate::common::session::write_session;
 use crate::common::state::{AppState, Session};
 use crate::common::types::{GenericResponse, Person};
 use super::guards::{AuthUser, SESSION_COOKIE};
@@ -48,6 +49,8 @@ pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): 
     let session = Session::new(user_id.unwrap());
 
     state.sessions.write().await.insert(session_id.clone(), session);
+    
+    write_session(state.redis, user_id.unwrap()).await?;
 
     // Build private (encrypted + signed) cookie
     let mut cookie = Cookie::new(SESSION_COOKIE, session_id);

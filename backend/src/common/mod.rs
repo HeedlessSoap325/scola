@@ -5,3 +5,4 @@ pub mod admin_auth;
 pub mod ownership;
 pub mod sql;
 pub mod extractors;
+pub mod session;
