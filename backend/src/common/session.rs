@@ -58,3 +58,46 @@ pub async fn delete_session(
 
 	Ok(())
 }
+
+pub async fn delete_sessions_with_value(
+    redis: deadpool_redis::Pool,
+    target_value: &str,
+) -> Result<u64, AppError> {
+    let mut conn: deadpool_redis::Connection = redis.get()
+		.await
+		.map_err(redis_pool_error)?;
+
+    let mut deleted = 0u64;
+    let mut cursor: u64 = 0;
+
+    loop {
+        let (next_cursor, keys): (u64, Vec<String>) = redis::cmd("SCAN")
+            .arg(cursor)
+            .arg("MATCH")
+            .arg("session:*")
+            .arg("COUNT")
+            .arg(100)
+            .query_async(&mut conn)
+            .await
+			.map_err(redis_error)?;
+
+        for key in keys {
+            let value: Option<String> = conn.get(&key)
+				.await
+				.map_err(redis_error)?;
+            if value.as_deref() == Some(target_value) {
+                let del: u64 = conn.del(&key)
+					.await
+					.map_err(redis_error)?;
+                deleted += del;
+            }
+        }
+
+        cursor = next_cursor;
+        if cursor == 0 {
+            break;
+        }
+    }
+
+    Ok(deleted)
+}

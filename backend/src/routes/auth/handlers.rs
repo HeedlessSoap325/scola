@@ -6,11 +6,10 @@ use axum::{
 use bcrypt::verify;
 use cookie::{time::Duration, Cookie, SameSite};
 use tower_cookies::Cookies;
-use uuid::Uuid;
 
 use crate::common::error::AppError;
-use crate::common::session::{delete_session, write_session};
-use crate::common::state::{AppState, Session};
+use crate::common::session::{delete_session, delete_sessions_with_value, write_session};
+use crate::common::state::AppState;
 use crate::common::types::{GenericResponse, Person};
 use super::guards::{AuthUser, SESSION_COOKIE};
 use super::models::*;
@@ -85,7 +84,7 @@ pub async fn logout_all(
 ) -> Result<GenericResponse, AppError>
 {
     // Invalidate server-side sessions
-    state.sessions.write().await.retain(|_, session| session.user_id != user.id);
+    delete_sessions_with_value(state.redis, user.id.to_string().as_str()).await?;
       
     // Remove the cookie from the client
     let mut removal = Cookie::from(SESSION_COOKIE);
