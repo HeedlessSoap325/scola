@@ -6,7 +6,7 @@ use axum::{
 use chrono::{DateTime, Utc};
 use tower_cookies::Cookies;
 use uuid::Uuid;
-use crate::common::{error::AppError, state::AppState, types::{Person, PersonRole}};
+use crate::common::{error::AppError, session::get_session, state::AppState, types::{Person, PersonRole}};
 
 pub const SESSION_COOKIE: &str = "session_id";
 
@@ -39,20 +39,10 @@ impl FromRequestParts<AppState> for AuthUser {
 
         let session_id = session_cookie.value().to_string();
 
-        // 3. Look up the session
-        let session = {
-            let sessions = state.sessions.read().await;
-            sessions
-                .get(&session_id)
-                .cloned()
-                .ok_or(AuthError::InvalidSession)?
-            // read guard dropped here
-        };
-        
-        if !session.valid() {
-            state.sessions.write().await.remove(&session_id);
-            return Err(AuthError::InvalidSession);
-        }
+        let user_id = get_session(state.redis.clone(), session_id)
+            .await
+            .map_err(|_| AuthError::InvalidSession)?
+            .ok_or(AuthError::InvalidSession)?;
 
         // 4. Look up the user
         let person = sqlx::query_as::<_, Person>(
@@ -60,7 +50,7 @@ impl FromRequestParts<AppState> for AuthUser {
 				SELECT * FROM person p where p.id = $1 
 			"#
 		)
-		.bind(session.user_id)
+		.bind(user_id)
 		.fetch_one(&state.pool)
 		.await;
 

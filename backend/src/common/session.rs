@@ -23,3 +23,22 @@ pub async fn write_session(
 
 	Ok(session_id)
 }
+
+pub async fn get_session(
+	redis: deadpool_redis::Pool,
+	session_id: String
+) -> Result<Option<Uuid>, AppError>
+{
+	let mut conn: deadpool_redis::Connection = redis.get()
+		.await
+		.map_err(redis_pool_error)?;
+
+	let val: Option<String> = conn.get(format!("session:{session_id}"))
+		.await
+		.map_err(redis_error)?;
+
+	match val {
+		Some(user_id) => Ok(Some(Uuid::from_str(user_id.as_str()).unwrap())),
+		None => Ok(None),
+	}
+}
