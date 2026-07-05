@@ -45,12 +45,7 @@ pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): 
     }
 
     // Create session
-    let session_id = Uuid::new_v4().to_string();
-    let session = Session::new(user_id.unwrap());
-
-    state.sessions.write().await.insert(session_id.clone(), session);
-    
-    write_session(state.redis, user_id.unwrap()).await?;
+    let session_id = write_session(state.redis, user_id.unwrap()).await?;
 
     // Build private (encrypted + signed) cookie
     let mut cookie = Cookie::new(SESSION_COOKIE, session_id);
