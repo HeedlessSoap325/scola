@@ -9,7 +9,7 @@ use tower_cookies::Cookies;
 use uuid::Uuid;
 
 use crate::common::error::AppError;
-use crate::common::session::write_session;
+use crate::common::session::{delete_session, write_session};
 use crate::common::state::{AppState, Session};
 use crate::common::types::{GenericResponse, Person};
 use super::guards::{AuthUser, SESSION_COOKIE};
@@ -60,14 +60,14 @@ pub async fn login(State(state): State<AppState>, cookies: Cookies, Json(body): 
     Ok(GenericResponse(StatusCode::OK, "Logged in"))
 }
 
-pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser) -> GenericResponse {
+pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser) -> Result<GenericResponse, AppError> {
     let private = cookies.private(&state.cookie_key);
 
     if let Some(session_cookie) = private.get(SESSION_COOKIE) {
         let session_id = session_cookie.value().to_string();
 
         // Invalidate server-side session
-        state.sessions.write().await.remove(&session_id);
+        delete_session(state.redis, session_id).await?;
 
         // Remove the cookie from the client
         let mut removal = Cookie::from(SESSION_COOKIE);
@@ -75,7 +75,7 @@ pub async fn logout(State(state): State<AppState>, cookies: Cookies, _: AuthUser
         cookies.remove(removal);
     }
 
-    GenericResponse(StatusCode::OK, "Logged out")
+    Ok(GenericResponse(StatusCode::OK, "Logged out"))
 }
 
 pub async fn logout_all(

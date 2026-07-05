@@ -42,3 +42,19 @@ pub async fn get_session(
 		None => Ok(None),
 	}
 }
+
+pub async fn delete_session(
+	redis: deadpool_redis::Pool,
+	session_id: String,
+) -> Result<(), AppError>
+{
+	let mut conn: deadpool_redis::Connection = redis.get()
+		.await
+		.map_err(redis_pool_error)?;
+
+	let _: u64 = conn.del(format!("session:{session_id}"))
+		.await
+		.map_err(redis_error)?;
+
+	Ok(())
+}
