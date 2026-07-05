@@ -120,7 +120,7 @@ cp .env.example .env
 | `BACKEND_DATABASE_USER` | Database user for the backend | Yes | - | Must have login privileges; optionally `CREATEDATABASE` for `sqlx database` commands |
 | `BACKEND_DATABASE_PASSWORD` | Password for `BACKEND_DATABASE_USER` | Yes | - | |
 | `BACKEND_DATABASE_HOST` | Database host | Yes | - | |
-| `BACKEND_VALKEY_USER` | Valkey user for the backend | Yes | - | Must be active, have access to all keys and have get, set and del commands enabled on the `BACKEND_VALKEY_DATABASE` database. |
+| `BACKEND_VALKEY_USER` | Valkey user for the backend | Yes | - | Must be active, have access to all keys and have get, setex, scan and del commands enabled on the `BACKEND_VALKEY_DATABASE` database. |
 | `BACKEND_VALKEY_PASSWORD` | Password for `BACKEND_VALKEY_USER` | Yes | - | |
 | `BACKEND_VALKEY_HOST` | Valkey host | Yes | |
 | `BACKEND_VALKEY_DATABASE` | Number of the Valkey database  | Yes | - | Valid indicies range from 0 to 15 |

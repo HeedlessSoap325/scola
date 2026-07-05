@@ -46,7 +46,7 @@ services:
       # create the specified user and the specified password
       VALKEY_EXTRA_FLAGS: >-
         --save 60 1 
-        --user ${BACKEND_VALKEY_USER} on >${BACKEND_VALKEY_PASSWORD} db=${BACKEND_VALKEY_DATABASE} allkeys nocommands +get +set +del
+        --user ${BACKEND_VALKEY_USER} on >${BACKEND_VALKEY_PASSWORD} db=${BACKEND_VALKEY_DATABASE} allkeys nocommands +get +setex +del +scan
     networks:
       - valkey
     healthcheck:
