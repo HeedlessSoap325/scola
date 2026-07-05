@@ -1,35 +1,14 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
-use chrono::{DateTime, Duration, Utc};
 use deadpool_redis::{Config, Runtime};
-use redis::AsyncCommands;
 use sqlx::{PgPool, postgres::PgPoolOptions};
-use tokio::sync::RwLock;
 use tower_cookies::Key;
-use uuid::Uuid;
-
-#[derive(Clone)]
-pub struct Session {
-	pub user_id: Uuid,
-	expiry: DateTime<Utc>,
-}
-
-impl Session {
-	pub fn new(user_id: Uuid) -> Self {
-		Self { user_id, expiry: Utc::now() + Duration::days(1) }
-	}
-
-	pub fn valid(&self) -> bool {
-		Utc::now() < self.expiry
-	}
-}
 
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
     pub cookie_key: Arc<Key>,
 	pub redis: deadpool_redis::Pool,
-	pub sessions: Arc<RwLock<HashMap<String, Session>>>
 }
 
 impl AppState {
@@ -81,7 +60,6 @@ impl AppState {
 			pool: pool.clone(),
 			cookie_key: Arc::new(Key::from(secret.as_bytes())),
 			redis: redis.clone(),
-			sessions: Arc::new(RwLock::new(HashMap::new())),
 		}
 	}
 }
