@@ -1,6 +1,7 @@
 use std::{collections::HashMap};
 
 use axum::http::StatusCode;
+use bigdecimal::BigDecimal;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -87,7 +88,11 @@ fn push_typed_bind(
         }
         "jsonb" | "json" => {
             sep.push_bind(sqlx::types::Json(value));
-        }
+        },
+        "numeric" => {
+            let v: BigDecimal = serde_json::from_value(value).map_err(type_err)?;
+            sep.push_bind(v);
+        },
         other => {
 			println!("unsupported column type: {}", other);
             return Err(AppError(
