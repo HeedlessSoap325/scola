@@ -16,3 +16,37 @@
 ##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/grade
 Accept: application/json
+
+
+### CREATE A GRADE
+## Creates a new grade an associate it with a student.
+## Restricted to Local Admin or Admin roles.
+##
+## Request Body:
+##   - value         (float, required): Value of the grade (from 0.000 - 6.000)
+##   - weight        (float, required): The weight of the grade (e.g. 1.000)
+##   - date          (NaiveDate, required): The date of the grade
+##   - student_id    (UUID, required): UUID of the student the grade belongs to
+##   - school_id     (UUID, optional): UUID of the school; only necessary if a admin creates a grade
+##
+## Responses:
+##   201 Created - Grade created successfully; returns the new grade ID
+##   400 Bad Request - Missing required fields or invalid UUID format
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - Student doesn't exist
+##   500 Internal Server Error - Database Query failed
+##
+# @name grade
+POST {{BASE}}/grade
+Content-Type: application/json
+Accept: application/json
+
+
+{
+    "value": "4.5",
+    "weight": "1.0",
+    "date": "2026-07-07",
+	"student_id": "8b738857-dc34-47ac-87e8-bf694594a82c",
+	"school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
+}
