@@ -28,7 +28,7 @@ pub enum PersonRole {
     Admin,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize, Default)]
 pub struct Person {
     pub id: Uuid,
     pub school_id: Uuid,
