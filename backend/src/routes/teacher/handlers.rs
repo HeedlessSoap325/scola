@@ -1,4 +1,5 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
+use bcrypt::{DEFAULT_COST, hash};
 use chrono::Utc;
 use sqlx::QueryBuilder;
 use uuid::Uuid;
@@ -49,4 +50,57 @@ pub async fn get_teachers(
 		.map_err(db_error)?;
 
 	Ok(Json(teachers))
+}
+
+pub async fn add_teacher(
+	State(state): State<AppState>,
+	user: AuthUser,
+	Json(body): Json<CreateTeacherRequest>,
+) -> Result<ResourceResponse, AppError>
+{
+	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
+
+	println!("Verifying");
+	let existing = sqlx::query(
+		"SELECT * FROM person WHERE login_name = $1 AND school_id = $2"
+	)
+	.bind(body.login_name.clone())
+	.bind(school_id)
+	.fetch_optional(&state.pool)
+	.await
+	.map_err(db_error)?;
+
+	if existing.is_some() {
+		return Err(AppError(StatusCode::BAD_REQUEST, "User with same login name already exists in the school"));
+	}
+
+	println!("Creating");
+	let password = hash(body.password, DEFAULT_COST)
+		.map_err(|_| AppError(StatusCode::INTERNAL_SERVER_ERROR, "Hashing of password failed"))?;
+	let person: Person = Person { 
+		id: Uuid::new_v4(), 
+		school_id: school_id,
+		email: body.email,
+		login_name: body.login_name,
+		first_name: body.first_name,
+		last_name: body.last_name,
+		picture: body.picture,
+		password: password,
+		created_at: Utc::now(),
+		role: PersonRole::Teacher,
+	};
+	println!("Creating2");
+	create_resource::<Person>(&state.pool, person.clone()).await?;
+
+	println!("Creating3");
+	let teacher: Teacher = Teacher { 
+		id: person.id,
+		address: body.address,
+		abbreviation: body.abbreviation,
+		phone: body.phone,
+	};
+	println!("Creating4");
+	create_resource::<Teacher>(&state.pool, teacher.clone()).await?;
+	
+	Ok(ResourceResponse(StatusCode::CREATED, person.id))
 }

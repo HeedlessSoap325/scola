@@ -20,3 +20,44 @@
 ##   500 Internal Server Error - Database Query failed
 GET {{BASE}}/teacher
 Accept: application/json
+
+
+### CREATE A TEACHER
+## Creates a new teacher within the authenticated user's school.
+## Restricted to Local Admin or Admin roles.
+##
+## Request Body:
+## 	 - email         (String, required): The email of the teacher
+## 	 - login_name    (String, required): The login name of the teacher, must be unique accross the school (e.g firstname.lastname)
+## 	 - first_name    (String, required): The fist name of the teacher
+## 	 - last_name     (String, required): The last name of the teacher
+## 	 - picture       (String, optional): A URL to a picture of the teacher
+## 	 - password      (String, required): The password to be set for the teacher
+## 	 - address       (String, required): The address of the teacher
+## 	 - abbreviation  (String, required): The abbreviation of the teacher (e.g Af)
+## 	 - phone         (String, required): The phone number of the teacher
+##   - school_id     (UUID, optional): UUID of the school; only necessary if a admin creates a teacher
+##
+## Responses:
+##   201 Created - Teacher created successfully; returns the id of the created teacher
+##   400 Bad Request - Missing required fields or invalid UUID format
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
+##
+# @name Af
+POST {{BASE}}/teacher
+Content-Type: application/json
+Accept: application/json
+
+{
+	"email": "amelie.froehlich@kaz.ch",
+	"login_name": "amelie.froehlich",
+	"first_name": "amelie",
+	"last_name": "Fröhlich",
+	"password": "1234",
+	"address": "Fröhlichplatz 2 8400 Winterthur",
+	"abbreviation": "Af",
+	"phone": "00411234567890",
+	"school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
+}
