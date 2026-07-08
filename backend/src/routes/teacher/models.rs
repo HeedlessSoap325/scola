@@ -1,9 +1,17 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize, sqlx::FromRow)]
+#[derive(Serialize, sqlx::FromRow, Default)]
 pub struct GetTeacherResponse {
-	//TODO
+	pub id: Uuid,
+	pub school_id: Uuid,
+	pub email: String,
+	pub first_name: String,
+	pub last_name: String,
+	pub picture: Option<String>,
+	pub address: String,
+	pub abbreviation: String,
+	pub phone: String,
 }
 
 #[derive(Deserialize)]
