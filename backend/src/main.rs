@@ -5,7 +5,7 @@ use tower_cookies::CookieManagerLayer;
 mod common;
 mod routes;
 
-use crate::{common::state::AppState, routes::{auth::handlers::{login, logout, logout_all, me}, class::handlers::{add_class, delete_class, edit_class, get_classes}, course::handlers::{add_course, delete_course, edit_course, get_courses}, grade::handlers::{add_grade, get_grades}, room::handlers::{add_room, delete_room, edit_room, get_rooms}, school::handlers::{add_school, delete_school, edit_school, get_schools}, semester::handlers::{add_semester, delete_semester, edit_semester, get_semesters}, timetable::handlers::get_timetable}};
+use crate::{common::state::AppState, routes::{auth::handlers::{login, logout, logout_all, me}, class::handlers::{add_class, delete_class, edit_class, get_classes}, course::handlers::{add_course, delete_course, edit_course, get_courses}, grade::handlers::{add_grade, get_grades}, room::handlers::{add_room, delete_room, edit_room, get_rooms}, school::handlers::{add_school, delete_school, edit_school, get_schools}, semester::handlers::{add_semester, delete_semester, edit_semester, get_semesters}, teacher::handlers::get_teachers, timetable::handlers::get_timetable}};
 
 #[tokio::main]
 async fn main() {
@@ -48,6 +48,8 @@ async fn main() {
 
         .route("/grade", get(get_grades))
         .route("/grade", post(add_grade))
+
+        .route("/teacher", get(get_teachers))
 
         .route("/timetable", get(get_timetable))
         .with_state(state)
