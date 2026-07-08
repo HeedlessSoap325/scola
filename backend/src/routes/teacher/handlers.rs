@@ -60,7 +60,6 @@ pub async fn add_teacher(
 {
 	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
 
-	println!("Verifying");
 	let existing = sqlx::query(
 		"SELECT * FROM person WHERE login_name = $1 AND school_id = $2"
 	)
@@ -74,7 +73,6 @@ pub async fn add_teacher(
 		return Err(AppError(StatusCode::BAD_REQUEST, "User with same login name already exists in the school"));
 	}
 
-	println!("Creating");
 	let password = hash(body.password, DEFAULT_COST)
 		.map_err(|_| AppError(StatusCode::INTERNAL_SERVER_ERROR, "Hashing of password failed"))?;
 	let person: Person = Person { 
@@ -89,17 +87,14 @@ pub async fn add_teacher(
 		created_at: Utc::now(),
 		role: PersonRole::Teacher,
 	};
-	println!("Creating2");
 	create_resource::<Person>(&state.pool, person.clone()).await?;
 
-	println!("Creating3");
 	let teacher: Teacher = Teacher { 
 		id: person.id,
 		address: body.address,
 		abbreviation: body.abbreviation,
 		phone: body.phone,
 	};
-	println!("Creating4");
 	create_resource::<Teacher>(&state.pool, teacher.clone()).await?;
 	
 	Ok(ResourceResponse(StatusCode::CREATED, person.id))

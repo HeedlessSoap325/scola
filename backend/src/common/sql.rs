@@ -39,10 +39,7 @@ fn push_typed_bind(
     value: Value,
     udt_name: &str,
 ) -> Result<(), AppError> {
-    let type_err = |_| {
-        println!("{}", udt_name);
-        AppError(StatusCode::INTERNAL_SERVER_ERROR, "value doesn't match column type")
-    };
+    let type_err = |_| AppError(StatusCode::INTERNAL_SERVER_ERROR, "value doesn't match column type");
 
     match udt_name {
         "uuid" => {
