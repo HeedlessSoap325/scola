@@ -61,3 +61,38 @@ Accept: application/json
 	"phone": "00411234567890",
 	"school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
 }
+
+
+### EDIT A TEACHER
+## Partially updates an existing teacher identified by the UUID in the path.
+## Only the fields provided in the request body will be updated (PATCH semantics).
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {teacher_id} (UUID): The UUID of the teacher to update
+##
+## Request Body (all fields optional - only included fields are updated):
+## 	 - email         (String, optional): The email of the teacher
+## 	 - login_name    (String, optional): The login name of the teacher, must be unique accross the school (e.g firstname.lastname)
+## 	 - first_name    (String, optional): The fist name of the teacher
+## 	 - last_name     (String, optional): The last name of the teacher
+## 	 - picture       (String, optional): A URL to a picture of the teacher
+## 	 - password      (String, optional): The password to be set for the teacher
+## 	 - address       (String, optional): The address of the teacher
+## 	 - abbreviation  (String, optional): The abbreviation of the teacher (e.g Af)
+## 	 - phone         (String, optional): The phone number of the teacher
+##   - school_id     (UUID, optional): UUID of the teacher; only necessary if a admin updates a teacher
+##
+## Responses:
+##   200 OK - Teacher updated successfully; returns updated teacher object
+##   400 Bad Request - Invalid UUID format or malformed body
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
+PATCH {{BASE}}/teacher/{{Af.response.body.resource_id}}
+Content-Type: application/json
+Accept: application/json
+
+{
+	"address": "Fröhlichstrasse 12 8400 Winterthur"
+}
