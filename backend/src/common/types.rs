@@ -1,5 +1,5 @@
 use axum::{Json, http::StatusCode, response::{IntoResponse, Response}};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::types::{BigDecimal, Uuid, chrono::{DateTime, NaiveDate, NaiveTime, Utc}};
 
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
@@ -19,7 +19,7 @@ pub struct Room {
     pub building: String,
 }
 
-#[derive(Debug, Clone, Copy, sqlx::Type, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, sqlx::Type, Serialize, PartialEq, Deserialize)]
 #[sqlx(type_name = "person_role", rename_all = "snake_case")]
 pub enum PersonRole {
     Student,

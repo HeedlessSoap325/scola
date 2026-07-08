@@ -96,6 +96,10 @@ fn push_typed_bind(
             let v: Option<BigDecimal> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         },
+        "person_role" => {
+            let role: PersonRole = serde_json::from_value(value).map_err(type_err)?;
+            sep.push_bind(role);
+        },
         other => {
 			println!("unsupported column type: {}", other);
             return Err(AppError(
