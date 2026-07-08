@@ -1,0 +1,22 @@
+### GET TEACHERS
+## Returns a list of teachers. The result set is scoped to the authenticated user's role:
+##   - Student | Teacher | Local Admin -> all teachers in the school
+##   - Admin -> all teachers across all schools
+##
+## Response Body (200 OK) - Array of teacher objects, each containing:
+## 	 - id:            (UUID, filterable): The UUID of the teacher
+##   - school_id:     (UUID, filterable): The UUID of the school the teacher is employed in
+##	 - email:         (String, filterable): The registered email of the teacher
+##	 - first_name:    (String, filterable): The first name of the teacher
+##	 - last_name:     (String, filterable): The last name of the teacher
+##	 - picture:       (String | null, filterable): The URL to the pictur of the teacher
+##	 - address:       (String, filterable): The registered address of the teacher
+##	 - abbreviation:  (String, filterable): The abbreviation of the Teacher (e.g. RFR)
+##	 - phone:         (String, filterable): The registered phone number of the teacher
+##
+## Responses:
+##   200 OK - Returns array of GetTeacherResponse objects
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
+GET {{BASE}}/teacher
+Accept: application/json
