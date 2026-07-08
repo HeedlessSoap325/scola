@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::common::{error::{AppError, db_error}, types::{Class, Course, Grade, Room, Semester, Student, Teacher}};
+use crate::common::{error::{AppError, db_error}, types::{Class, Course, Room, Semester, Student, Teacher}};
 
 /// Implement this for any resource type to verify
 pub trait SchoolOwned {

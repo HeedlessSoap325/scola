@@ -1,7 +1,7 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
 use bcrypt::{DEFAULT_COST, hash};
 use chrono::Utc;
-use sqlx::{QueryBuilder, encode::IsNull::No};
+use sqlx::QueryBuilder;
 use uuid::Uuid;
 
 use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, extractors::Filter, ownership::verify_ownership, sql::{create_resource, delete_resource}, state::AppState, types::{GenericResponse, Person, PersonRole, ResourceResponse, Teacher}}, routes::{auth::guards::AuthUser, teacher::models::{CreateTeacherRequest, GetTeacherResponse, PatchTeacherRequest}}};
