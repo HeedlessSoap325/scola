@@ -1,7 +1,7 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
 use bcrypt::{DEFAULT_COST, hash};
 use chrono::Utc;
-use sqlx::QueryBuilder;
+use sqlx::{QueryBuilder, encode::IsNull::No};
 use uuid::Uuid;
 
 use crate::{common::{admin_auth::{is_admin, resolve_school}, error::{AppError, db_error}, extractors::Filter, ownership::verify_ownership, sql::{create_resource, delete_resource}, state::AppState, types::{GenericResponse, Person, PersonRole, ResourceResponse, Teacher}}, routes::{auth::guards::AuthUser, teacher::models::{CreateTeacherRequest, GetTeacherResponse, PatchTeacherRequest}}};
@@ -98,4 +98,75 @@ pub async fn add_teacher(
 	create_resource::<Teacher>(&state.pool, teacher.clone()).await?;
 	
 	Ok(ResourceResponse(StatusCode::CREATED, person.id))
+}
+
+pub async fn edit_teacher(
+	State(state): State<AppState>,
+	user: AuthUser,
+	Path(teacher_id): Path<Uuid>,
+	Json(body): Json<PatchTeacherRequest>,
+) -> Result<GenericResponse, AppError>
+{
+	let school_id: Uuid = resolve_school(&user, body.school_id, &state.pool).await?;
+
+	if user.role == PersonRole::LocalAdmin {
+		verify_ownership::<Teacher>(&state.pool, teacher_id, school_id).await?;
+	}
+
+	sqlx::query(
+		r#"
+			UPDATE teacher
+			SET
+				address = COALESCE($1, address),
+				abbreviation = COALESCE($2, abbreviation),
+				phone = COALESCE($3, phone)
+			WHERE id = $4
+			RETURNING *
+		"#
+	)
+	.bind(body.address)
+	.bind(body.abbreviation)
+	.bind(body.phone)
+	.bind(teacher_id)
+	.fetch_optional(&state.pool)
+	.await
+	.map_err(db_error)?
+	.ok_or(AppError(StatusCode::NOT_FOUND, "Teacher not found"))?;
+
+	let password: Option<String> = match body.password {
+		Some(p) => {
+			let hash = hash(p, DEFAULT_COST)
+				.map_err(|_| AppError(StatusCode::INTERNAL_SERVER_ERROR, "Hashing of password failed"))?;
+			Some(hash)
+		},
+		None => None,
+	};
+
+	sqlx::query(
+		r#"
+			UPDATE person
+			SET
+				email = COALESCE($1, email),
+				login_name = COALESCE($2, login_name),
+				first_name = COALESCE($3, first_name),
+				last_name = COALESCE($4, last_name),
+				picture = COALESCE($5, picture),
+				password = COALESCE($6, password)
+			WHERE id = $7
+			RETURNING *
+		"#
+	)
+	.bind(body.email)
+	.bind(body.login_name)
+	.bind(body.first_name)
+	.bind(body.last_name)
+	.bind(body.picture)
+	.bind(password)
+	.bind(teacher_id)
+	.fetch_optional(&state.pool)
+	.await
+	.map_err(db_error)?
+	.ok_or(AppError(StatusCode::NOT_FOUND, "Person not found"))?;
+
+	Ok(GenericResponse(StatusCode::OK, "Teacher updated"))
 }
