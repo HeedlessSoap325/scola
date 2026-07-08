@@ -8,7 +8,7 @@ use serde_json::{Map, Value};
 use sqlx::{PgPool, Postgres, QueryBuilder, query_builder::Separated};
 use uuid::Uuid;
 
-use crate::common::error::{AppError, db_error};
+use crate::common::{error::{AppError, db_error}, types::PersonRole};
 
 fn get_field_map<T: Serialize>(value: &T) -> Map<String, Value>{
     let json = serde_json::to_value(value).unwrap();
@@ -39,58 +39,61 @@ fn push_typed_bind(
     value: Value,
     udt_name: &str,
 ) -> Result<(), AppError> {
-    let type_err = |_| AppError(StatusCode::INTERNAL_SERVER_ERROR, "value doesn't match column type");
+    let type_err = |_| {
+        println!("{}", udt_name);
+        AppError(StatusCode::INTERNAL_SERVER_ERROR, "value doesn't match column type")
+    };
 
     match udt_name {
         "uuid" => {
-            let v: Uuid = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<Uuid> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "text" | "varchar" | "bpchar" | "citext" => {
-            let v: String = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<String> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "int2" => {
-            let v: i16 = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<i16> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "int4" => {
-            let v: i32 = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<i32> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "int8" => {
-            let v: i64 = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<i64> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "float4" => {
-            let v: f32 = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<f32> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "float8" => {
-            let v: f64 = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<f64> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "bool" => {
-            let v: bool = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<bool> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "timestamp" => {
-            let v: NaiveDateTime = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<NaiveDateTime> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "timestamptz" => {
-            let v: DateTime<Utc> = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<DateTime<Utc>> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "date" => {
-            let v: NaiveDate = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<NaiveDate> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         }
         "jsonb" | "json" => {
             sep.push_bind(sqlx::types::Json(value));
         },
         "numeric" => {
-            let v: BigDecimal = serde_json::from_value(value).map_err(type_err)?;
+            let v: Option<BigDecimal> = serde_json::from_value(value).map_err(type_err)?;
             sep.push_bind(v);
         },
         other => {
