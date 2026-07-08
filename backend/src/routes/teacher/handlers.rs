@@ -170,3 +170,20 @@ pub async fn edit_teacher(
 
 	Ok(GenericResponse(StatusCode::OK, "Teacher updated"))
 }
+
+pub async fn delete_teacher(
+	State(state): State<AppState>,
+	user: AuthUser,
+	Path(teacher_id): Path<Uuid>,
+) -> Result<GenericResponse, AppError>
+{
+	is_admin(&user)?;
+
+	if user.role == PersonRole::LocalAdmin {
+		verify_ownership::<Teacher>(&state.pool, teacher_id, user.school_id).await?;
+	}
+
+	delete_resource::<Teacher>(&state.pool, teacher_id).await?;
+
+	Ok(GenericResponse(StatusCode::OK, "Teacher deleted"))
+}

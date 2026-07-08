@@ -96,3 +96,20 @@ Accept: application/json
 {
 	"address": "Fröhlichstrasse 12 8400 Winterthur"
 }
+
+
+### DELETE A TEACHER
+## Permanently deletes a teacher identified by its UUID in the path.
+## This action is irreversible.
+## Restricted to Local Admin or Admin roles.
+##
+## Path Parameter:
+##   - {teacher_id} (UUID): The UUID of the teacher to delete
+##
+## Responses:
+##   200 OK - Teacher deleted successfully
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   500 Internal Server Error - Database Query failed
+DELETE {{BASE}}/teacher/{{Af.response.body.resource_id}}
+Accept: application/json
