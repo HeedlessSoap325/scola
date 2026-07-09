@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::common::{error::{AppError, db_error}, types::{Class, Course, Room, Semester, Student, Teacher}};
+use crate::common::{error::{AppError, db_error}, types::{Class, Course, Grade, Room, Semester, Student, Teacher}};
 
 /// Implement this for any resource type to verify
 pub trait SchoolOwned {
@@ -40,6 +40,12 @@ impl SchoolOwned for Course {
 impl SchoolOwned for Student {
     fn school_id_query() -> &'static str {
         "SELECT school_id FROM person WHERE id = $1"
+    }
+}
+
+impl SchoolOwned for Grade {
+    fn school_id_query() -> &'static str {
+        "SELECT school_id FROM person WHERE id = (SELECT student_id FROM grade WHERE id = $1)"
     }
 }
 
