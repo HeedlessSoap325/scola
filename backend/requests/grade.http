@@ -48,5 +48,6 @@ Accept: application/json
     "weight": "1.0",
     "date": "2026-07-07",
 	"student_id": "8b738857-dc34-47ac-87e8-bf694594a82c",
-	"school_id": "2c64f5d3-4c82-4474-acf6-caa82be28f66"
+	"description": "Eine Testnote",
+    "course_id": "df010b05-0fc5-46d1-a372-ce7c4443b9e6" 
 }
