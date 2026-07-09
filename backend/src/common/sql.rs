@@ -5,7 +5,7 @@ use bigdecimal::BigDecimal;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use serde::Serialize;
 use serde_json::{Map, Value};
-use sqlx::{PgPool, Postgres, QueryBuilder, query_builder::Separated};
+use sqlx::{FromRow, PgPool, Postgres, QueryBuilder, query_builder::Separated};
 use uuid::Uuid;
 
 use crate::common::{error::{AppError, db_error}, types::PersonRole};
@@ -182,6 +182,34 @@ pub async fn delete_resource<T: Serialize>(
 
 	Ok(())
 }
+
+/// Get a resource of type T, identified by it's ID.
+/// 
+/// The name of the generic "T" will be used as the tablename (first letter will not be capital)
+/// So the Struct for "T" must be the same name as the table to delete
+pub async fn get_resource<T>(
+    pool: &PgPool,
+    id: Uuid,
+) -> Result<T, AppError>
+where T: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Send + Unpin + Serialize,
+{
+    let table_name = get_struct_name::<T>();
+    let mut builder: QueryBuilder<Postgres> =
+        QueryBuilder::new(format!(
+            "SELECT * FROM {} WHERE id = ",
+            quote_ident(&table_name)
+        ));
+    builder.push_bind(id);
+
+    let result = builder
+        .build_query_as::<T>()
+        .fetch_one(pool)
+        .await
+        .map_err(db_error)?;
+
+    Ok(result)
+}
+
 
 /// Wraps an identifier in double quotes and escapes embedded quotes,
 /// as defense in depth on top of the allow-list check.
