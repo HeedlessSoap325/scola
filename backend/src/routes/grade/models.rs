@@ -14,7 +14,7 @@ pub struct CreateGradeRequest {
     pub value: BigDecimal,
     pub weight: BigDecimal,
     pub date: NaiveDate,
-    pub description: String,
+    pub description: Option<String>,
 }
 
 #[derive(Deserialize)]
