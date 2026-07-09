@@ -20,14 +20,15 @@ Accept: application/json
 
 ### CREATE A GRADE
 ## Creates a new grade an associate it with a student.
-## Restricted to Local Admin or Admin roles.
+## Restricted to Local Admin, Admin or Teacher roles.
 ##
 ## Request Body:
 ##   - value         (float, required): Value of the grade (from 0.000 - 6.000)
 ##   - weight        (float, required): The weight of the grade (e.g. 1.000)
 ##   - date          (NaiveDate, required): The date of the grade
 ##   - student_id    (UUID, required): UUID of the student the grade belongs to
-##   - school_id     (UUID, optional): UUID of the school; only necessary if a admin creates a grade
+##   - course_id     (UUID, optional): UUID of the course
+##   - description   (String, optional): A description of the grade
 ##
 ## Responses:
 ##   201 Created - Grade created successfully; returns the new grade ID
@@ -50,4 +51,36 @@ Accept: application/json
 	"student_id": "8b738857-dc34-47ac-87e8-bf694594a82c",
 	"description": "Eine Testnote",
     "course_id": "df010b05-0fc5-46d1-a372-ce7c4443b9e6" 
+}
+
+
+### EDIT A GRADE
+## Partially updates an existing grade identified by its UUID in the path.
+## Only the fields provided in the request body will be updated (PATCH semantics).
+## Restricted to Local Admin, Admin or Teacher roles.
+##
+## Path Parameter:
+##   - {grade_id} (UUID): The UUID of the grade to update
+##
+## Request Body (all fields optional - only included fields are updated):
+##   - value         (float, optional): Value of the grade (from 0.000 - 6.000)
+##   - weight        (float, optional): The weight of the grade (e.g. 1.000)
+##   - date          (NaiveDate, optional): The date of the grade
+##   - student_id    (UUID, optional): UUID of the student the grade belongs to
+##   - course_id     (UUID, optional): UUID of the course
+##   - description   (String, optional): A description of the grade
+##
+## Responses:
+##   200 OK - grade updated successfully; returns updated grade object
+##   400 Bad Request - Invalid UUID format or malformed body
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - grade does not exist
+##   500 Internal Server Error - Database Query failed
+PATCH {{BASE}}/grade/{{grade.response.body.resource_id}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "description": "Vokabeltest"
 }
