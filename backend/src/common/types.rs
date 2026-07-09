@@ -70,9 +70,11 @@ pub struct Student {
 pub struct Grade {
     pub id: Uuid,
     pub student_id: Uuid,
+    pub course_id: Uuid,
     pub value: BigDecimal,
     pub weight: BigDecimal,
     pub date: NaiveDate,
+    pub description: String,
 }
 
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
