@@ -102,5 +102,7 @@ pub async fn me(auth: AuthUser) -> Result<Json<MeResponse>, AppError> {
         first_name: auth.first_name,
         last_name: auth.last_name,
         picture: auth.picture,
+        role: auth.role,
+        created_at: auth.created_at,
     }))
 }
