@@ -27,7 +27,7 @@ Accept: application/json
 ##   - weight        (float, required): The weight of the grade (e.g. 1.000)
 ##   - date          (NaiveDate, required): The date of the grade
 ##   - student_id    (UUID, required): UUID of the student the grade belongs to
-##   - course_id     (UUID, optional): UUID of the course
+##   - grade_id     (UUID, optional): UUID of the grade
 ##   - description   (String, optional): A description of the grade
 ##
 ## Responses:
@@ -67,7 +67,7 @@ Accept: application/json
 ##   - weight        (float, optional): The weight of the grade (e.g. 1.000)
 ##   - date          (NaiveDate, optional): The date of the grade
 ##   - student_id    (UUID, optional): UUID of the student the grade belongs to
-##   - course_id     (UUID, optional): UUID of the course
+##   - grade_id     (UUID, optional): UUID of the grade
 ##   - description   (String, optional): A description of the grade
 ##
 ## Responses:
@@ -84,3 +84,20 @@ Accept: application/json
 {
     "description": "Vokabeltest"
 }
+
+
+### DELETE A GRADE
+## Permanently deletes a grade identified by its UUID in the path.
+## This action is irreversible. 
+## Restricted to Local Admin, Admin and Teacher roles.
+##
+## Path Parameter:
+##   - {grade_id} (UUID): The UUID of the grade to delete
+##
+## Responses:
+##   200 OK - grade deleted successfully
+##   401 Unauthorized - Insufficient permissions for this role
+##   403 Forbidden - No active session
+##   404 Not Found - grade UUID does not exist
+DELETE {{BASE}}/grade/{{grade.response.body.resource_id}}
+Accept: application/json
