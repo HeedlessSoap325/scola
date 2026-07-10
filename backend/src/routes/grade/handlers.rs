@@ -1,7 +1,7 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
 use uuid::Uuid;
 
-use crate::{common::{error::{AppError, db_error}, ownership::verify_ownership, sql::{create_resource, get_resource}, state::AppState, types::{Course, GenericResponse, Grade, PersonRole, ResourceResponse, Student}}, routes::{auth::guards::AuthUser, grade::models::{CreateGradeRequest, GetGradeResponse, PatchGradeRequest}}, verify_ownerships};
+use crate::{common::{error::{AppError, db_error}, ownership::verify_ownership, sql::{create_resource, delete_resource, get_resource}, state::AppState, types::{Course, GenericResponse, Grade, PersonRole, ResourceResponse, Student}}, routes::{auth::guards::AuthUser, grade::models::{CreateGradeRequest, GetGradeResponse, PatchGradeRequest}}, verify_ownerships};
 
 pub async fn get_grades(
 	State(state): State<AppState>,
@@ -120,4 +120,34 @@ pub async fn edit_grade(
     .ok_or(AppError(StatusCode::NOT_FOUND, "Grade not found"))?;
 
 	Ok(GenericResponse(StatusCode::OK, "Grade updated"))
+}
+
+pub async fn delete_grade(
+	State(state): State<AppState>,
+	user: AuthUser,
+	Path(grade_id): Path<Uuid>,
+) -> Result<GenericResponse, AppError>
+{
+	match user.role {
+		PersonRole::Student => {
+			return Err(AppError(StatusCode::UNAUTHORIZED, "Insufficient Privileges"))
+		},
+		PersonRole::Teacher | PersonRole::LocalAdmin => {
+			verify_ownership::<Grade>(&state.pool, grade_id, user.school_id).await?;
+
+			if user.role == PersonRole::Teacher {
+				let grade: Grade = get_resource::<Grade>(&state.pool, grade_id).await?;
+				let course: Course = get_resource::<Course>(&state.pool, grade.course_id).await?;
+
+				if course.teacher_id != user.id {
+					return Err(AppError(StatusCode::BAD_REQUEST, "You are not a teacher of that course"))
+				}
+			}
+		},
+		PersonRole::Admin => {}
+	};
+
+	delete_resource::<Grade>(&state.pool, grade_id).await?;
+
+	Ok(GenericResponse(StatusCode::OK, "Grade deleted"))
 }
